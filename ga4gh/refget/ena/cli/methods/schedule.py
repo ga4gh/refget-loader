@@ -2,6 +2,7 @@ import click
 import datetime
 import os
 from ga4gh.refget.ena.resources.get_resource import *
+from ga4gh.refget.ena.cli.methods.process import process
 
 @click.command()
 @click.option("-n", "--number-of-days", type=click.INT, default=1,
@@ -30,6 +31,7 @@ def schedule(**kwargs):
             os.makedirs(sub_dir)
 
         # processing method
+        process(date_string, sub_dir)
 
         # create the next date and update the config file
         date = datetime.date(*[int(a) for a in [year, month, day]])
