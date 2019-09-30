@@ -1,4 +1,5 @@
 import datetime
+import os
 import re
 import requests
 from xml.etree import ElementTree
@@ -55,17 +56,40 @@ class AssemblyScanner(object):
 
             aggregate_chunk_string = aggregate_chunk_string[final_end_position:]
     
-    def process_all(self):
+    def generate_accession_list(self, file_path):
+
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+        output_file = open(file_path, "a")
+        header = "\t".join(
+            ["Accession", "URL"])+"\n"
+        output_file.write(header)
 
         for assembly_xml in self.assemblies_xml_generator():
+            accession = None
+            url = None
+            status = "NotAttempted"
+            message = "N/A"
+            last_modified = datetime.datetime.now().strftime(
+                "%Y-%m-%dT%H:%M:%S")
+
             root = ElementTree.fromstring(assembly_xml)
+            accession = re.compile(
+                'accession=\"(.+?)\"').search(assembly_xml).group(1)
             for assembly_links in root.iter("ASSEMBLY_LINKS"):
                 for assembly_link in assembly_links.iter("ASSEMBLY_LINK"):
                     for url_link in assembly_link.iter("URL_LINK"):
                         label = url_link.find("LABEL").text
                         if label == "WGS_SET_FLATFILE":
-                            print(url_link.find("URL").text)
-
+                            url = url_link.find("URL").text
+            
+            if accession and url:
+                output_line = "\t".join(
+                    [accession, url]
+                ) + "\n"
+                output_file.write(output_line)
+        output_file.close()
     
     def __initialize_query(self):
         year, month, day = self.date_string.split("-")

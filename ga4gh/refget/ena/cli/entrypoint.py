@@ -2,6 +2,7 @@ import click
 
 from ga4gh.refget.ena.cli.methods.checkpoint import checkpoint
 from ga4gh.refget.ena.cli.methods.schedule import schedule
+from ga4gh.refget.ena.cli.methods.settings import settings
 
 @click.group()
 def main():
@@ -9,3 +10,4 @@ def main():
 
 main.add_command(checkpoint)
 main.add_command(schedule)
+main.add_command(settings)
