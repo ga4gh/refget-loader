@@ -50,7 +50,7 @@ def process_single_flatfile(processing_dir, accession, url):
             )
         if os.path.exists(dat_link):
             os.remove(dat_link)
-        os.symlink(dat_orig, dat_link, overwrite=True)
+        os.symlink(dat_orig, dat_link)
 
         
         bsub_template = ""
