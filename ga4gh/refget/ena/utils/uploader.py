@@ -63,13 +63,20 @@ class Uploader(object):
     
     def upload_sequence_and_json(self, seq_dict):
         self.upload_trunc512_and_md5(seq_dict, "seq_path")
-        # self.upload_trunc512_and_md5(seq_dict, "json_path")
+        self.upload_trunc512_and_md5(seq_dict, "json_path")
     
     def upload_trunc512_and_md5(self, seq_dict, file_key):
+
+        key_prefix_dict = {
+            "seq_path": "sequence/", 
+            "json_path": "metadata/json/"
+        }
+        key_prefix = key_prefix_dict[file_key]
+
         put_object_template = \
             "aws s3api put-object " \
             + "--bucket {bucket} " \
-            + "--key {key} " \
+            + "--key {key_prefix}{key} " \
             + "--acl public-read "
         put_object_trunc512_template = put_object_template \
             + "--body {file_path}"
@@ -78,11 +85,13 @@ class Uploader(object):
 
         trunc512_parameters = {
             "bucket": self.s3_bucket,
+            "key_prefix": key_prefix,
             "key": seq_dict["trunc512"],
             "file_path": seq_dict[file_key]
         }
         md5_parameters = {
             "bucket": self.s3_bucket,
+            "key_prefix": key_prefix,
             "key": seq_dict["md5"],
             "redirect": "/" + seq_dict["trunc512"]
         }
