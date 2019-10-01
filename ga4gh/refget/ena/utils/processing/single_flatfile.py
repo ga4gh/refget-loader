@@ -29,9 +29,11 @@ def write_process_cmd_and_bsub(subdir, file_path, job_id, cmd_dir, log_dir):
     return write_cmd_and_bsub(cmd, cmd_dir, log_dir, "process", job_id)
 
 def write_upload_cmd_and_bsub(subdir, job_id, cmd_dir, log_dir):
-    cmd_template = "ena-refget-scheduler upload {}"
-    cmd = cmd_template.format(subdir)
-    return write_cmd_and_bsub(cmd, cmd_dir, log_dir, "upload", job_id)
+    hold_jobname = "process.{}".format(job_id)
+    cmd_template = "ena-refget-scheduler upload {} {}"
+    cmd = cmd_template.format(job_id, subdir)
+    return write_cmd_and_bsub(cmd, cmd_dir, log_dir, "upload", job_id,
+        hold_jobname=hold_jobname)
 
 def process_single_flatfile(processing_dir, accession, url):
 
@@ -70,8 +72,10 @@ def process_single_flatfile(processing_dir, accession, url):
             cmd_dir, log_dir)
         upload_bsub_file = write_upload_cmd_and_bsub(subdir, url_id, cmd_dir,
             log_dir)
-        os.system(process_bsub_file)
-        os.system(upload_bsub_file)
+
+        #TODO: un-comment these when ready to execute
+        # os.system(process_bsub_file)
+        # os.system(upload_bsub_file)
         
     except Exception as e:
         status_dict["status"] = "Failed"
