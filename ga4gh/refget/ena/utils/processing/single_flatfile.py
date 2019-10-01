@@ -9,12 +9,15 @@ def write_cmd_and_bsub(cmd, cmd_dir, cmd_name):
     bsub = 'bsub "{}"'.format(cmd_file)
     open(cmd_file, "w").write(cmd + "\n")
     open(bsub_file, "w").write(bsub + "\n")
+    os.chmod(cmd_file, 0o744)
+    os.chmod(bsub_file, 0o744)
+    return bsub_file
 
 def write_process_cmd_and_bsub(subdir, file_path, process_id, cmd_dir):
     perl_script = parse_settings_ini()["refget_ena_settings"]["perl_script"]
     cmd_template = "{} --store-path {} --file-path {} --process-id {}"
     cmd = cmd_template.format(perl_script, subdir, file_path, process_id)
-    write_cmd_and_bsub(cmd, cmd_dir, "process")
+    return write_cmd_and_bsub(cmd, cmd_dir, "process")
 
 def make_upload_command():
     pass
@@ -52,8 +55,9 @@ def process_single_flatfile(processing_dir, accession, url):
             os.remove(dat_link)
         os.symlink(dat_orig, dat_link)
 
-        
-        bsub_template = ""
+        process_bsub_file = write_process_cmd_and_bsub(
+            subdir, dat_link, url_id, cmd_dir)
+        os.system(process_bsub_file)
         
     except Exception as e:
         status_dict["status"] = "Failed"
