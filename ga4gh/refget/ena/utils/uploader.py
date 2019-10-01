@@ -1,4 +1,6 @@
 import os
+import json
+from ga4gh.refget.ena.functions.time import timestamp
 
 class Uploader(object):
     
@@ -16,13 +18,25 @@ class Uploader(object):
             self.csv_columns[i]: i for i in range(0, len(self.csv_columns))
         }
 
+        self.status_file = os.path.join(self.processing_dir, "status.txt")
+        self.status = {}
+
     def validate_and_upload_all(self):
         
         try:
+            self.status = self.read_status()
             self.validate_all()
             self.upload_all()
+            self.status["status"] = "Completed"
+
         except Exception as e:
-            pass
+            self.status["status"] = "Failed"
+            self.status["message"] = str(e)
+        finally:
+            self.status["last_modified"] = timestamp()
+            open(self.status_file, "w").write(
+                json.dumps(self.status, indent=4, sort_keys=True) + "\n"
+            )
     
     def validate_all(self):
         header = True
@@ -78,3 +92,6 @@ class Uploader(object):
     def upload(self, template, parameters):
         command = template.format(**parameters)
         os.system(command)
+    
+    def read_status(self):
+        return json.loads(open(self.status_file, "r").read())

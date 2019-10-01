@@ -13,7 +13,7 @@ def write_cmd_and_bsub(cmd, cmd_dir, log_dir, cmd_name, job_id,
     bsub_file = os.path.join(cmd_dir, cmd_name + ".bsub")
     bsub = 'bsub -o {} -e {} -J {} '.format(logfile_out, logfile_err, job_name)
     if hold_jobname:
-        bsub += '-w done({}) '.format(hold_jobname)
+        bsub += "-w 'ended({})' ".format(hold_jobname)
     bsub += '"{}"'.format(cmd_file)
 
     open(cmd_file, "w").write(cmd + "\n")
@@ -76,6 +76,7 @@ def process_single_flatfile(processing_dir, accession, url):
         #TODO: un-comment these when ready to execute
         # os.system(process_bsub_file)
         # os.system(upload_bsub_file)
+        status_dict["status"] = "InProgress"
         
     except Exception as e:
         status_dict["status"] = "Failed"
