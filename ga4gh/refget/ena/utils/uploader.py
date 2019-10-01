@@ -99,7 +99,7 @@ class Uploader(object):
         md5_parameters = {
             "bucket": self.s3_bucket,
             "s3_path": md5_path,
-            "redirect": trunc512_path
+            "redirect": "/" + trunc512_path
         }
         self.upload(put_object_trunc512_template, trunc512_parameters)
         self.upload(put_object_md5_template, md5_parameters)
