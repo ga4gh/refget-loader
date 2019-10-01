@@ -46,7 +46,7 @@ def process_single_flatfile(processing_dir, accession, url):
         if not os.path.exists(d):
             os.makedirs(d)
 
-    status_fp = os.path.join(subdir, "status.txt")
+    status_fp = os.path.join(subdir, "status.json")
     status_dict = {
         "accession": accession,
         "url": url,
@@ -54,34 +54,35 @@ def process_single_flatfile(processing_dir, accession, url):
         "message": "None",
         "last_modified": timestamp()
     }
+    if os.path.exists(status_fp):
+        status_dict = json.loads(open(status_fp, "r").read())
+    if status_dict["status"] != "Completed":
+        try:
+            dat_orig = url.replace("ftp://ftp.ebi.ac.uk", "/nfs/ftp")
+            dat_link = os.path.join(subdir, url_basename)
 
-    try:
-        dat_orig = url.replace("ftp://ftp.ebi.ac.uk", "/nfs/ftp")
-        dat_link = os.path.join(subdir, url_basename)
+            if not os.path.exists(dat_orig):
+                raise Exception(
+                    "input .dat file could not be located at the path: " 
+                    + dat_orig
+                )
+            if os.path.exists(dat_link):
+                os.remove(dat_link)
+            os.symlink(dat_orig, dat_link)
 
-        if not os.path.exists(dat_orig):
-            raise Exception(
-                "input .dat file could not be located at the path: " 
-                + dat_orig
-            )
-        if os.path.exists(dat_link):
-            os.remove(dat_link)
-        os.symlink(dat_orig, dat_link)
+            process_bsub_file = write_process_cmd_and_bsub(subdir, dat_link, 
+                url_id, cmd_dir, log_dir)
+            upload_bsub_file = write_upload_cmd_and_bsub(subdir, url_id, 
+                cmd_dir, log_dir)
 
-        process_bsub_file = write_process_cmd_and_bsub(subdir, dat_link, url_id,
-            cmd_dir, log_dir)
-        upload_bsub_file = write_upload_cmd_and_bsub(subdir, url_id, cmd_dir,
-            log_dir)
-
-        #TODO: un-comment these when ready to execute
-        # os.system(process_bsub_file)
-        # os.system(upload_bsub_file)
-        status_dict["status"] = "InProgress"
-        
-    except Exception as e:
-        status_dict["status"] = "Failed"
-        status_dict["message"] = str(e)
-    finally:
-        status_dict["last_modified"] = timestamp()
-        open(status_fp, "w").write(
-            json.dumps(status_dict, indent=4, sort_keys=True) + "\n")
+            #TODO: un-comment these when ready to execute
+            # os.system(process_bsub_file)
+            # os.system(upload_bsub_file)
+            status_dict["status"] = "InProgress"
+        except Exception as e:
+            status_dict["status"] = "Failed"
+            status_dict["message"] = str(e)
+        finally:
+            status_dict["last_modified"] = timestamp()
+            open(status_fp, "w").write(
+                json.dumps(status_dict, indent=4, sort_keys=True) + "\n")

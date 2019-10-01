@@ -18,7 +18,7 @@ class Uploader(object):
             self.csv_columns[i]: i for i in range(0, len(self.csv_columns))
         }
 
-        self.status_file = os.path.join(self.processing_dir, "status.txt")
+        self.status_file = os.path.join(self.processing_dir, "status.json")
         self.status = {}
 
     def validate_and_upload_all(self):
@@ -39,14 +39,23 @@ class Uploader(object):
             )
     
     def validate_all(self):
+        if not os.path.exists(self.csv):
+            raise Exception("ena-refget-processor output csv file not found")
+
         header = True
+        seq_count = 0
         for line in open(self.csv, "r"):
             if header:
                 header = False
             else:
                 line_d = self.parse_csv_line(line)
+                seq_count += 1
                 if not line_d["completed"] == "1":
                     raise Exception("Not all sequences processed successfully")
+        
+        if seq_count < 1:
+            raise Exception(
+                "No sequences found in ena-refget-processor csv file")
 
     def upload_all(self):
         header = True
