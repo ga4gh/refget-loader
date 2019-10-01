@@ -48,7 +48,9 @@ def process_single_flatfile(processing_dir, accession, url):
                 "input .dat file could not be located at the path: " 
                 + dat_orig
             )
-        os.symlink(dat_orig, dat_link)
+        if os.path.exists(dat_link):
+            os.remove(dat_link)
+        os.symlink(dat_orig, dat_link, overwrite=True)
 
         
         bsub_template = ""
