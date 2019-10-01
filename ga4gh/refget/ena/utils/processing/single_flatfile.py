@@ -66,9 +66,10 @@ def process_single_flatfile(processing_dir, accession, url):
             os.remove(dat_link)
         os.symlink(dat_orig, dat_link)
 
-        process_bsub_file = write_process_cmd_and_bsub(
-            subdir, dat_link, url_id, cmd_dir)
-        upload_bsub_file = write_upload_cmd_and_bsub(subdir, url_id, cmd_dir)
+        process_bsub_file = write_process_cmd_and_bsub(subdir, dat_link, url_id,
+            cmd_dir, log_dir)
+        upload_bsub_file = write_upload_cmd_and_bsub(subdir, url_id, cmd_dir,
+            log_dir)
         os.system(process_bsub_file)
         os.system(upload_bsub_file)
         
