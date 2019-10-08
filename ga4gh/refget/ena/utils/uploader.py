@@ -39,6 +39,8 @@ class Uploader(object):
     :type status: dict[str, str]
     :param put_object_template: cli template for aws s3 upload
     :type put_object_template: str
+    :param nseqs: number of seqs processed from the assembly
+    :type nseqs: int
     :param subprocess_exit_codes: exit codes from all upload commands
     :type subprocess_exit_codes: list[int]
     """
@@ -63,6 +65,7 @@ class Uploader(object):
             + "--key {s3_path} " \
             + "--acl public-read "
         
+        self.nseqs = 0
         self.subprocess_exit_codes = []
 
     def validate_and_upload_all(self):
@@ -77,7 +80,7 @@ class Uploader(object):
             self.upload_all()
             self.post_upload_validation()
             self.status["status"] = "Completed"
-
+            self.status["message"] = ""
         except Exception as e:
             # any errors raised by the validation or upload methods will set
             # status to Failed
@@ -120,12 +123,27 @@ class Uploader(object):
                 "No sequences found in ena-refget-processor csv file")
     
     def post_upload_validation(self):
-        """validate no errors were encountered during the upload process"""
+        """validate no errors were encountered during the upload process
 
-        print("Hello, post validation function")
-        print(len(self.subprocess_exit_codes))
-        print(self.subprocess_exit_codes)
-        print("***")
+        :raises: Exception
+        """
+
+        n_algorithms = 2 # trunc512, md5
+        n_filetypes = 2 # sequence, json
+        n_csv = 1 # 1 csv uploaded for each flat file
+
+        # calculate the number of file uploads that should have occurred based
+        # on number of rows in csv file, raise Exception if there is a mismatch
+        total_uploads = (self.nseqs * n_algorithms * n_filetypes) + n_csv
+        if len(self.subprocess_exit_codes) != total_uploads:
+            raise Exception("number of files uploaded does not match expected")
+
+        # ensure that all exit codes from the upload subprocesses were all 0
+        exit_codes_dedup = list(set(self.subprocess_exit_codes))
+        if len(exit_codes_dedup) > 1:
+            raise Exception("non-zero upload exit codes detected")
+        if exit_codes_dedup[0] != 0:
+            raise Exception("non-zero upload exit codes detected")
 
     def upload_all(self):
         """upload all seqs, metadata described in csv, plus the csv itself"""
@@ -135,6 +153,7 @@ class Uploader(object):
             if header:
                 header = False
             else:
+                self.nseqs += 1
                 seq_dict = self.parse_loader_csv_line(line)
                 self.upload_sequence_and_json(seq_dict)
         self.upload_full_csv()
@@ -242,7 +261,7 @@ class Uploader(object):
         """
 
         command = template.format(**parameters)
-        exit_code = subprocess.call(command)
+        exit_code = subprocess.call(command.split(" "))
         self.subprocess_exit_codes.append(exit_code)
     
     def read_status(self):
