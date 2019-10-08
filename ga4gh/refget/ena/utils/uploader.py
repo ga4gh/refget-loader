@@ -3,6 +3,7 @@
 
 import os
 import json
+import subprocess
 from ga4gh.refget.ena.functions.time import timestamp
 
 class Uploader(object):
@@ -38,6 +39,8 @@ class Uploader(object):
     :type status: dict[str, str]
     :param put_object_template: cli template for aws s3 upload
     :type put_object_template: str
+    :param subprocess_exit_codes: exit codes from all upload commands
+    :type subprocess_exit_codes: list[int]
     """
     
     def __init__(self, process_id, processing_dir):
@@ -59,6 +62,8 @@ class Uploader(object):
             + "--bucket {bucket} " \
             + "--key {s3_path} " \
             + "--acl public-read "
+        
+        self.subprocess_exit_codes = []
 
     def validate_and_upload_all(self):
         """validate, then upload all seqs, metadata if no errors detected"""
@@ -68,8 +73,9 @@ class Uploader(object):
             # then run the validation method
             # if validation succeeds, proceed with the upload
             self.status = self.read_status()
-            self.validate_all()
+            self.pre_upload_validation()
             self.upload_all()
+            self.post_upload_validation()
             self.status["status"] = "Completed"
 
         except Exception as e:
@@ -84,7 +90,7 @@ class Uploader(object):
                 json.dumps(self.status, indent=4, sort_keys=True) + "\n"
             )
     
-    def validate_all(self):
+    def pre_upload_validation(self):
         """validate assembly was processed correctly, seqs are safe to upload
 
         :raises: Exception
@@ -112,6 +118,14 @@ class Uploader(object):
         if seq_count < 1:
             raise Exception(
                 "No sequences found in ena-refget-processor csv file")
+    
+    def post_upload_validation(self):
+        """validate no errors were encountered during the upload process"""
+
+        print("Hello, post validation function")
+        print(len(self.subprocess_exit_codes))
+        print(self.subprocess_exit_codes)
+        print("***")
 
     def upload_all(self):
         """upload all seqs, metadata described in csv, plus the csv itself"""
@@ -228,7 +242,8 @@ class Uploader(object):
         """
 
         command = template.format(**parameters)
-        os.system(command)
+        exit_code = subprocess.call(command)
+        self.subprocess_exit_codes.append(exit_code)
     
     def read_status(self):
         """load status file json as a dictionary
