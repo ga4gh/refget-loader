@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+"""Schedule-related command, runs process/upload for specified number of days"""
+
 import click
 import datetime
 import os

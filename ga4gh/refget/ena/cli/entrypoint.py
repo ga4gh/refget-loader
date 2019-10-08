@@ -1,5 +1,7 @@
-import click
+# -*- coding: utf-8 -*-
+"""Main entrypoint into the program"""
 
+import click
 from ga4gh.refget.ena.cli.methods.checkpoint import checkpoint
 from ga4gh.refget.ena.cli.methods.schedule import schedule
 from ga4gh.refget.ena.cli.methods.settings import settings
