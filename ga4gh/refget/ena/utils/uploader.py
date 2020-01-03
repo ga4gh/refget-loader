@@ -5,6 +5,7 @@ import os
 import json
 import subprocess
 from ga4gh.refget.ena.functions.time import timestamp
+from ga4gh.refget.ena.resources.get_resource import parse_settings_ini
 
 class Uploader(object):
     """Uploads all sequences, metadata, csv from a single flatfile to s3
@@ -48,9 +49,11 @@ class Uploader(object):
     def __init__(self, process_id, processing_dir):
         """Constructor method"""
 
+        settings_ini = parse_settings_ini()
+        self.aws_profile = settings_ini["refget_ena_settings"]["aws_profile"]
         self.process_id = process_id
         self.processing_dir = processing_dir
-        self.s3_bucket = "ga4gh-refget"
+        self.s3_bucket = settings_ini["refget_ena_settings"]["s3_bucket"]
 
         self.loader_csv, self.loader_columns, self.loader_dict = \
             self.__initialize_loader_csv()
@@ -63,7 +66,8 @@ class Uploader(object):
             "aws s3api put-object " \
             + "--bucket {bucket} " \
             + "--key {s3_path} " \
-            + "--acl public-read "
+            + "--acl public-read " \
+            + "{aws_profile} "
         
         self.nseqs = 0
         self.subprocess_exit_codes = []
@@ -220,16 +224,22 @@ class Uploader(object):
         put_object_md5_template = self.put_object_template \
             + "--website-redirect-location {redirect}"
 
+        profile = "" \
+                  if self.aws_profile == "default" \
+                  else "--profile " + self.aws_profile
+
         # parameters to modify the command templates
         trunc512_parameters = {
             "bucket": self.s3_bucket,
             "s3_path": trunc512_path,
-            "file_path": seq_dict[file_key]
+            "file_path": seq_dict[file_key],
+            "aws_profile": profile
         }
         md5_parameters = {
             "bucket": self.s3_bucket,
             "s3_path": md5_path,
-            "redirect": "/" + trunc512_path
+            "redirect": "/" + trunc512_path,
+            "aws_profile": profile
         }
 
         # upload both trunc512 and md5 files by rendering the command template,
@@ -261,6 +271,8 @@ class Uploader(object):
         """
 
         command = template.format(**parameters)
+        print("the command is: ")
+        print(command)
         exit_code = subprocess.call(command.split(" "))
         self.subprocess_exit_codes.append(exit_code)
     
