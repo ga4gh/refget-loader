@@ -17,7 +17,10 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 install_requires = [
-    "awscli", "click", "requests"
+    "awscli", 
+    "click",
+    "jsonschema",
+    "requests"
 ]
 
 setuptools.setup(

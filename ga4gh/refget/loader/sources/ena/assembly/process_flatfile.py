@@ -4,8 +4,7 @@
 import json
 import logging
 import os
-from ga4gh.refget.ena.functions.time import timestamp
-from ga4gh.refget.ena.resources.get_resource import parse_settings_ini
+from ga4gh.refget.loader.sources.ena.assembly.functions.time import timestamp
 
 def write_cmd_and_bsub(cmd, cmd_dir, log_dir, cmd_name, job_id, 
     hold_jobname=None):
@@ -49,7 +48,8 @@ def write_cmd_and_bsub(cmd, cmd_dir, log_dir, cmd_name, job_id,
     os.chmod(bsub_file, 0o744)
     return bsub_file
 
-def write_process_cmd_and_bsub(subdir, file_path, job_id, cmd_dir, log_dir):
+def write_process_cmd_and_bsub(subdir, perl_script, file_path, job_id, cmd_dir,
+    log_dir):
     """Write batch files for processing (ena-refget-processor) step
 
     :param subdir: directory where output seqs will be written
@@ -66,7 +66,6 @@ def write_process_cmd_and_bsub(subdir, file_path, job_id, cmd_dir, log_dir):
     :rtype: str
     """
 
-    perl_script = parse_settings_ini()["refget_ena_settings"]["perl_script"]
     cmd_template = "{} --store-path {} --file-path {} --process-id {}"
     cmd = cmd_template.format(perl_script, subdir, file_path, job_id)
     return write_cmd_and_bsub(cmd, cmd_dir, log_dir, "process", job_id)
@@ -92,7 +91,7 @@ def write_upload_cmd_and_bsub(subdir, job_id, cmd_dir, log_dir):
     return write_cmd_and_bsub(cmd, cmd_dir, log_dir, "upload", job_id,
         hold_jobname=hold_jobname)
 
-def process_single_flatfile(processing_dir, accession, url):
+def process_flatfile(config_obj, processing_dir, accession, url):
     """submit process and upload jobs for a single flatfile
 
     There are 2 components to getting flatfiles to S3: processing via 
@@ -108,6 +107,7 @@ def process_single_flatfile(processing_dir, accession, url):
     :type url: str
     """
 
+    perl_script = config_obj["ena_refget_processor_script"]
     logging.debug("{} - flatfile process attempt".format(accession))
 
     # create the processing sub-directory to prevent too many files in 
@@ -159,8 +159,8 @@ def process_single_flatfile(processing_dir, accession, url):
             # create cmd and bsub files for both components:
             # 1. ena-refget-processor
             # 2. upload
-            process_bsub_file = write_process_cmd_and_bsub(subdir, dat_link, 
-                url_id, cmd_dir, log_dir)
+            process_bsub_file = write_process_cmd_and_bsub(subdir, perl_script,
+                dat_link, url_id, cmd_dir, log_dir)
             upload_bsub_file = write_upload_cmd_and_bsub(subdir, url_id, 
                 cmd_dir, log_dir)
 

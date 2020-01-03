@@ -1,5 +1,7 @@
 import click
+import json
 from ga4gh.refget.loader.config.constants import Status
+from ga4gh.refget.loader.config.methods import METHODS
 from ga4gh.refget.loader.validation.validator import \
     validate_source, validate_destination
 
@@ -26,7 +28,12 @@ def load(**kwargs):
             if result["status"] != Status.SUCCESS:
                 raise Exception(result["message"])
         
-        
+        source_obj = json.load(open(kwargs["source"]))
+        processing_method = METHODS["processing"][source_obj["type"]]
+        processing_method(source_obj)
+
+        # destination_obj = json.load(open(kwargs["destination"]))
+        # upload_method = METHODS["upload"][destination_obj["type"]]
 
     except Exception as e:
         print(e)

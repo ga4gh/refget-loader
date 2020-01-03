@@ -1,17 +1,22 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "id",
-  "$ref": "ref",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$id": "https://github.com/ga4gh/refget-loader/tree/master/ga4gh/refget/loader/config/schemas/aws_s3.json",
+  "title": "RefgetLoaderSourceAwsS3",
+  "type": "object",
+  "$ref": "aws_s3.json#/definitions/RefgetLoaderDestinationAwsS3",
   "definitions": {
     "RefgetLoaderDestinationAwsS3": {
       "type": "object",
       "properties": {
-        "bar": {
+        "bucket_name": {
+          "type": "string"
+        },
+        "profile": {
           "type": "string"
         }
       },
       "required": [
-        "bar"
+        "bucket_name"
       ]
     }
   }

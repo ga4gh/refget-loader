@@ -1,4 +1,5 @@
 {
   "type": "aws_s3",
-  "foo": "baz"
+  "bucket_name": "insdc-mirror",
+  "profile": "ga4gh-insdc"
 }
