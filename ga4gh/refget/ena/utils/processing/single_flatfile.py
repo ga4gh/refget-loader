@@ -2,6 +2,7 @@
 """Process all assemblies for a single flatfile"""
 
 import json
+import logging
 import os
 from ga4gh.refget.ena.functions.time import timestamp
 from ga4gh.refget.ena.resources.get_resource import parse_settings_ini
@@ -106,6 +107,8 @@ def process_single_flatfile(processing_dir, accession, url):
     :param url: FTP url for this flatfile (from AssemblyScanner list)
     :type url: str
     """
+
+    logging.debug("processing single flatfile with accession: " + accession)
 
     # create the processing sub-directory to prevent too many files in 
     # NFS filesystem

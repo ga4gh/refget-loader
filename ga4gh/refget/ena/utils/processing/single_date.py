@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Process all assemblies for a single date"""
 
+import logging
 import os
 from ga4gh.refget.ena.utils.assembly_scanner import AssemblyScanner
 from ga4gh.refget.ena.utils.processing.single_flatfile \
@@ -20,8 +21,10 @@ def process_single_date(date_string, processing_dir):
     accession_list_file = os.path.join(
         processing_dir, "accessions_list.txt")
     if os.path.exists(accession_list_file):
-        pass
+        logging.info("accessions list already exists, skipping accession "
+                     + "search")
     else:
+        logging.info("generating accessions list from search API scan")
         scanner = AssemblyScanner(date_string)
         scanner.generate_accession_list(accession_list_file)
 

@@ -33,11 +33,15 @@ def schedule(**kwargs):
             
             # create sub directory, logfile
             sub_dir = os.path.join(root_dir, year, month, day)
-            logfile = os.path.join(sub_dir, "logfile.txt")
-            logging.basicConfig(level=logging.DEBUG, filename=logfile)
-            logging.debug("logging to logfile: " + logfile)
             if not os.path.exists(sub_dir):
                 os.makedirs(sub_dir)
+            logfile = os.path.join(sub_dir, "logfile.txt")
+            logging.basicConfig(
+                filename=logfile,
+                format='%(asctime)s\t%(levelname)s\t%(message)s',
+                level=logging.DEBUG,
+            )
+            logging.info("logs for sequences uploaded on: " + date_string)
 
             # processing method
             process_single_date(date_string, sub_dir)
@@ -49,3 +53,4 @@ def schedule(**kwargs):
             config["refget_ena_checkpoint"]["run_start"] = next_date_string
             with open(get_checkpoint_path(), "w") as configfile:
                 config.write(configfile)
+            logging.info("set checkpoint date to " + next_date_string)
