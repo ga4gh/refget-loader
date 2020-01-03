@@ -138,6 +138,8 @@ def process_single_flatfile(processing_dir, accession, url):
     # only execute if status is not "Completed"
     if status_dict["status"] != "Completed":
         try:
+            status_dict["status"] = "InProgress"
+
             # the ftp url maps to a local file path onsite, we do not need
             # to download the flatfile to process
             dat_orig = url.replace("ftp://ftp.ebi.ac.uk", "/nfs/ftp")
@@ -163,9 +165,8 @@ def process_single_flatfile(processing_dir, accession, url):
                 cmd_dir, log_dir)
 
             #TODO: un-comment these when ready to execute
-            # os.system(process_bsub_file)
-            # os.system(upload_bsub_file)
-            status_dict["status"] = "InProgress"
+            os.system(process_bsub_file)
+            os.system(upload_bsub_file)
         except Exception as e:
             # any exceptions in the above will set the status to "Failed",
             # to be retried later
