@@ -108,7 +108,7 @@ def process_single_flatfile(processing_dir, accession, url):
     :type url: str
     """
 
-    logging.debug("processing single flatfile with accession: " + accession)
+    logging.debug("{} - flatfile process attempt".format(accession))
 
     # create the processing sub-directory to prevent too many files in 
     # NFS filesystem
@@ -171,6 +171,8 @@ def process_single_flatfile(processing_dir, accession, url):
             # to be retried later
             status_dict["status"] = "Failed"
             status_dict["message"] = str(e)
+            logging.error("{} - flatfile process attempt failed: {}".format(
+                accession, str(e)))
         finally:
             # write the status dictionary to the status file
             status_dict["last_modified"] = timestamp()

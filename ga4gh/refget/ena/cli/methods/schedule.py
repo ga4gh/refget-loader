@@ -54,3 +54,7 @@ def schedule(**kwargs):
             with open(get_checkpoint_path(), "w") as configfile:
                 config.write(configfile)
             logging.info("set checkpoint date to " + next_date_string)
+
+            # remove logging handler so new log file is written to the next date
+            for handler in logging.root.handlers:
+                logging.root.removeHandler(handler)
