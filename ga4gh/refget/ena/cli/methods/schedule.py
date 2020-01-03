@@ -3,6 +3,7 @@
 
 import click
 import datetime
+import logging
 import os
 from ga4gh.refget.ena.resources.get_resource import *
 from ga4gh.refget.ena.utils.processing.single_date import process_single_date
@@ -30,8 +31,11 @@ def schedule(**kwargs):
             date_string = config["refget_ena_checkpoint"]["run_start"]
             year, month, day = date_string.split("-")
             
-            # create sub directory
+            # create sub directory, logfile
             sub_dir = os.path.join(root_dir, year, month, day)
+            logfile = os.path.join(sub_dir, "logfile.txt")
+            logging.basicConfig(level=logging.DEBUG, filename=logfile)
+            logging.debug("logging to logfile: " + logfile)
             if not os.path.exists(sub_dir):
                 os.makedirs(sub_dir)
 
