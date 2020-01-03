@@ -2,6 +2,7 @@
 """Process all assemblies for a single flatfile"""
 
 import json
+import logging
 import os
 from ga4gh.refget.ena.functions.time import timestamp
 from ga4gh.refget.ena.resources.get_resource import parse_settings_ini
@@ -107,6 +108,8 @@ def process_single_flatfile(processing_dir, accession, url):
     :type url: str
     """
 
+    logging.debug("{} - flatfile process attempt".format(accession))
+
     # create the processing sub-directory to prevent too many files in 
     # NFS filesystem
     # create directory to hold batch commands and logs
@@ -135,6 +138,8 @@ def process_single_flatfile(processing_dir, accession, url):
     # only execute if status is not "Completed"
     if status_dict["status"] != "Completed":
         try:
+            status_dict["status"] = "InProgress"
+
             # the ftp url maps to a local file path onsite, we do not need
             # to download the flatfile to process
             dat_orig = url.replace("ftp://ftp.ebi.ac.uk", "/nfs/ftp")
@@ -160,14 +165,15 @@ def process_single_flatfile(processing_dir, accession, url):
                 cmd_dir, log_dir)
 
             #TODO: un-comment these when ready to execute
-            # os.system(process_bsub_file)
-            # os.system(upload_bsub_file)
-            status_dict["status"] = "InProgress"
+            os.system(process_bsub_file)
+            os.system(upload_bsub_file)
         except Exception as e:
             # any exceptions in the above will set the status to "Failed",
             # to be retried later
             status_dict["status"] = "Failed"
             status_dict["message"] = str(e)
+            logging.error("{} - flatfile process attempt failed: {}".format(
+                accession, str(e)))
         finally:
             # write the status dictionary to the status file
             status_dict["last_modified"] = timestamp()

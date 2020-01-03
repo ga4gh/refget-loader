@@ -3,6 +3,7 @@
 
 import os
 import json
+import logging
 import subprocess
 from ga4gh.refget.ena.functions.time import timestamp
 from ga4gh.refget.ena.resources.get_resource import parse_settings_ini
@@ -271,8 +272,7 @@ class Uploader(object):
         """
 
         command = template.format(**parameters)
-        print("the command is: ")
-        print(command)
+        logging.debug("the command is: " + command)
         exit_code = subprocess.call(command.split(" "))
         self.subprocess_exit_codes.append(exit_code)
     

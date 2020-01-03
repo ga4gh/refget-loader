@@ -2,6 +2,7 @@
 """Defines AssemblyScanner class, uses ENA search API to find assemblies"""
 
 import datetime
+import logging
 import os
 import re
 import requests
@@ -136,7 +137,6 @@ class AssemblyScanner(object):
 
         # runs the generator
         for assembly_xml in self.assemblies_xml_generator():
-
             accession = None
             url = None
             status = "NotAttempted"
