@@ -1,0 +1,4 @@
+{
+  "type": "aws_s3",
+  "foo": "baz"
+}

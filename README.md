@@ -1,5 +1,13 @@
-# ENA Refget Scheduler
-Schedule processing of ENA sequences and upload to public S3 bucket
+# Refget Loader
+Load reference sequences to Public Cloud Storage from a variety of data sources
+
+## Overview
+
+### Supported Cloud Environments
+* AWS S3
+
+### Supported Data Sources
+* ENA Assemblies
 
 ## Getting Started
 
