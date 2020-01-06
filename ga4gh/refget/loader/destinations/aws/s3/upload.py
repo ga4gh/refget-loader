@@ -17,7 +17,7 @@ def aws_s3_upload(config_obj, table):
 
     base_config = {"bucket_name": config_obj["bucket_name"]}
     base_config["aws_profile"] = \
-        config_obj["profile"] \
+        "--profile " + config_obj["profile"] \
         if "profile" in config_obj.keys() \
         else ""
     
