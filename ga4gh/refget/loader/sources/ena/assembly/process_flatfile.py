@@ -170,7 +170,7 @@ def process_flatfile(processing_dir, accession, url, config_obj, source_config,
             #TODO: un-comment these when ready to execute
             os.system(process_bsub_file)
             os.system(manifest_bsub_file)
-            os.system(upload_bsub_file)
+            # os.system(upload_bsub_file)
 
         except Exception as e:
             # any exceptions in the above will set the status to "Failed",

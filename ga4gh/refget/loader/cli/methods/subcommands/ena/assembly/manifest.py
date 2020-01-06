@@ -15,6 +15,7 @@ def manifest(**kwargs):
     processing_dir = kwargs["processing_dir"]
     file_id = kwargs["file_id"]
     logs_dir = processing_dir + "/logs"
+    full_csv_path = logs_dir + "/" + file_id + ".full.csv"
     loader_csv_path = logs_dir + "/" + file_id + ".loader.csv"
     loader_csv = open(loader_csv_path, "r")
 
@@ -46,5 +47,13 @@ def manifest(**kwargs):
                 ls[loader_cols["md5"]]
             ])
             output_content.append(new_line)
+
+    # add additional lines for uploading the .full.csv
+    output_content.append("# additional uploads")
+    output_content.append("\t".join(["source", "destination"]))
+    output_content.append("\t".join([
+        full_csv_path,
+        "metadata/csv/" + file_id + ".full.csv"
+    ]))
     
     output_manifest.write("\n".join(output_content) + "\n")

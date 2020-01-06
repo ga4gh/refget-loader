@@ -32,8 +32,5 @@ def load(**kwargs):
         processing_method = METHODS["processing"][source_obj["type"]]
         processing_method(source_obj, kwargs["source"], kwargs["destination"])
 
-        # destination_obj = json.load(open(kwargs["destination"]))
-        # upload_method = METHODS["upload"][destination_obj["type"]]
-
     except Exception as e:
         print(e)
