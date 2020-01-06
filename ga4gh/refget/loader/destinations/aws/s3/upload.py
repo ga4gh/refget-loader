@@ -1,6 +1,6 @@
 import os
 
-def aws_s3_upload(config_obj, table):
+def aws_s3_upload(config_obj, seq_table, additional_table):
     
     put_object_template = \
         "aws s3api put-object " \
@@ -55,13 +55,26 @@ def aws_s3_upload(config_obj, table):
         kwargs.update(base_config)
         upload(put_secondary_template, kwargs)
 
+    def upload_additional_entry(line):
+        ls = line.rstrip().split("\t")
+        params = {"file_path": ls[0], "s3_path": ls[1]}
+        params.update(base_config)
+        upload(put_primary_template, params)
+
     def upload(template, parameters):
         cmd = template.format(**parameters)
         os.system(cmd)
 
     header = True
-    for line in table:
+    for line in seq_table:
         if header:
             header = False
         else:
             upload_manifest_entry(line)
+    
+    header = True
+    for line in additional_table:
+        if header:
+            header = False
+        else:
+            upload_additional_entry(line)
