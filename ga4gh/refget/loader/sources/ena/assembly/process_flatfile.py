@@ -70,26 +70,26 @@ def write_process_cmd_and_bsub(subdir, perl_script, file_path, job_id, cmd_dir,
     cmd = cmd_template.format(perl_script, subdir, file_path, job_id)
     return write_cmd_and_bsub(cmd, cmd_dir, log_dir, "process", job_id)
 
-def write_upload_cmd_and_bsub(subdir, job_id, cmd_dir, log_dir):
-    """Write batch files for upload step
-
-    :param subdir: directory where output seqs will be written
-    :type subdir: str
-    :param job_id: unique id distinguishing it from other upload jobs
-    :type job_id: str
-    :param cmd_dir: path to batch command directory
-    :type cmd_dir: str
-    :param log_dir: path to logs directory
-    :type log_dir: str
-    :return: path to bsub command file
-    :rtype: str
-    """
-
-    hold_jobname = "process.{}".format(job_id)
-    cmd_template = "ena-refget-scheduler upload {} {}"
-    cmd = cmd_template.format(job_id, subdir)
-    return write_cmd_and_bsub(cmd, cmd_dir, log_dir, "upload", job_id,
-        hold_jobname=hold_jobname)
+# def write_upload_cmd_and_bsub(subdir, job_id, cmd_dir, log_dir):
+#     """Write batch files for upload step
+# 
+#     :param subdir: directory where output seqs will be written
+#     :type subdir: str
+#     :param job_id: unique id distinguishing it from other upload jobs
+#     :type job_id: str
+#     :param cmd_dir: path to batch command directory
+#     :type cmd_dir: str
+#     :param log_dir: path to logs directory
+#     :type log_dir: str
+#     :return: path to bsub command file
+#     :rtype: str
+#     """
+# 
+#     hold_jobname = "process.{}".format(job_id)
+#     cmd_template = "ena-refget-scheduler upload {} {}"
+#     cmd = cmd_template.format(job_id, subdir)
+#     return write_cmd_and_bsub(cmd, cmd_dir, log_dir, "upload", job_id,
+#         hold_jobname=hold_jobname)
 
 def process_flatfile(config_obj, processing_dir, accession, url):
     """submit process and upload jobs for a single flatfile
@@ -161,12 +161,13 @@ def process_flatfile(config_obj, processing_dir, accession, url):
             # 2. upload
             process_bsub_file = write_process_cmd_and_bsub(subdir, perl_script,
                 dat_link, url_id, cmd_dir, log_dir)
-            upload_bsub_file = write_upload_cmd_and_bsub(subdir, url_id, 
-                cmd_dir, log_dir)
+            # upload_bsub_file = write_upload_cmd_and_bsub(subdir, url_id, 
+            #     cmd_dir, log_dir)
 
             #TODO: un-comment these when ready to execute
             os.system(process_bsub_file)
-            os.system(upload_bsub_file)
+            # os.system(upload_bsub_file)
+
         except Exception as e:
             # any exceptions in the above will set the status to "Failed",
             # to be retried later
