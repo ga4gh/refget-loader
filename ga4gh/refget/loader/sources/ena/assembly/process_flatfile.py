@@ -79,13 +79,13 @@ def write_manifest_cmd_and_bsub(subdir, job_id, source_config,
     return write_cmd_and_bsub(cmd, cmd_dir, log_dir, "manifest", job_id,
         hold_jobname=hold_jobname)
 
-def write_upload_cmd_and_bsub(subdir, job_id, cmd_dir, log_dir): 
-    pass
-    # hold_jobname = "manifest.{}".format(job_id)
-    # cmd_template = "refget-loader upload {}"
-    # cmd = cmd_template.format(job_id, subdir)
-#     return write_cmd_and_bsub(cmd, cmd_dir, log_dir, "upload", job_id,
-#         hold_jobname=hold_jobname)
+def write_upload_cmd_and_bsub(manifest, job_id, cmd_dir, log_dir): 
+    
+    hold_jobname = "manifest.{}".format(job_id)
+    cmd_template = "refget-loader upload {}"
+    cmd = cmd_template.format(manifest)
+    return write_cmd_and_bsub(cmd, cmd_dir, log_dir, "upload", job_id,
+        hold_jobname=hold_jobname)
 
 def process_flatfile(processing_dir, accession, url, config_obj, source_config,
     destination_config):
@@ -153,6 +153,9 @@ def process_flatfile(processing_dir, accession, url, config_obj, source_config,
                 os.remove(dat_link)
             os.symlink(dat_orig, dat_link)
 
+            manifest = subdir + "/" + url_id + "/logs/" + url_id \
+                + ".manifest.csv"
+
             # create cmd and bsub files for both components:
             # 1. ena-refget-processor
             # 2. generate manifest from full and loader csv
@@ -161,13 +164,13 @@ def process_flatfile(processing_dir, accession, url, config_obj, source_config,
                 dat_link, url_id, cmd_dir, log_dir)
             manifest_bsub_file = write_manifest_cmd_and_bsub(subdir, url_id,
                 source_config, destination_config, cmd_dir, log_dir)
-            # upload_bsub_file = write_upload_cmd_and_bsub(subdir, url_id, 
-            #     cmd_dir, log_dir)
+            upload_bsub_file = write_upload_cmd_and_bsub(manifest, url_id, 
+                cmd_dir, log_dir)
 
             #TODO: un-comment these when ready to execute
             os.system(process_bsub_file)
             os.system(manifest_bsub_file)
-            # os.system(upload_bsub_file)
+            os.system(upload_bsub_file)
 
         except Exception as e:
             # any exceptions in the above will set the status to "Failed",
