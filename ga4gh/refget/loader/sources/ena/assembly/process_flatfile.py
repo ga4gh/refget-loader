@@ -153,7 +153,7 @@ def process_flatfile(processing_dir, accession, url, config_obj, source_config,
                 os.remove(dat_link)
             os.symlink(dat_orig, dat_link)
 
-            manifest = subdir + "/" + url_id + "/logs/" + url_id \
+            manifest = subdir + "/" + "/logs/" + url_id \
                 + ".manifest.csv"
 
             # create cmd and bsub files for both components:
