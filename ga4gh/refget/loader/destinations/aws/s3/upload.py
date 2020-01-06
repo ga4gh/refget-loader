@@ -48,15 +48,15 @@ def aws_s3_upload(config_obj, table):
                 redirect=metadata_primary_path)
 
     def upload_file_primary_checksum(**kwargs):
-        params = kwargs.update(base_config)
-        upload(put_primary_template, params)
+        kwargs.update(base_config)
+        upload(put_primary_template, kwargs)
 
     def upload_file_secondary_checksum(**kwargs):
-        params = kwargs.update(base_config)
-        upload(put_secondary_template, params)
+        kwargs.update(base_config)
+        upload(put_secondary_template, kwargs)
 
     def upload(template, parameters):
-        cmd = template.format(parameters)
+        cmd = template.format(**parameters)
         os.system(cmd)
 
     header = True
