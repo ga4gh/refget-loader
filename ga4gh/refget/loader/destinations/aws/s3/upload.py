@@ -42,10 +42,10 @@ def aws_s3_upload(config_obj, table):
             metadata_secondary_path = "metadata/json/" + secondary_id + ".json"
             # seq
             upload_file_secondary_checksum(s3_path=seq_secondary_path,
-                redirect=seq_primary_path)
+                redirect="/"+seq_primary_path)
             # metadata
             upload_file_secondary_checksum(s3_path=metadata_secondary_path,
-                redirect=metadata_primary_path)
+                redirect="/"+metadata_primary_path)
 
     def upload_file_primary_checksum(**kwargs):
         kwargs.update(base_config)
