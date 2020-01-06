@@ -70,28 +70,25 @@ def write_process_cmd_and_bsub(subdir, perl_script, file_path, job_id, cmd_dir,
     cmd = cmd_template.format(perl_script, subdir, file_path, job_id)
     return write_cmd_and_bsub(cmd, cmd_dir, log_dir, "process", job_id)
 
-# def write_upload_cmd_and_bsub(subdir, job_id, cmd_dir, log_dir):
-#     """Write batch files for upload step
-# 
-#     :param subdir: directory where output seqs will be written
-#     :type subdir: str
-#     :param job_id: unique id distinguishing it from other upload jobs
-#     :type job_id: str
-#     :param cmd_dir: path to batch command directory
-#     :type cmd_dir: str
-#     :param log_dir: path to logs directory
-#     :type log_dir: str
-#     :return: path to bsub command file
-#     :rtype: str
-#     """
-# 
-#     hold_jobname = "process.{}".format(job_id)
-#     cmd_template = "ena-refget-scheduler upload {} {}"
-#     cmd = cmd_template.format(job_id, subdir)
+def write_manifest_cmd_and_bsub(subdir, job_id, source_config, 
+    destination_config, cmd_dir, log_dir):
+    hold_jobname = "process.{}".format(job_id)
+    cmd_template = "refget-loader subcommands ena assembly manifest " \
+        + "{} {} {} {}"
+    cmd = cmd_template.format(subdir, job_id, source_config, destination_config)
+    return write_cmd_and_bsub(cmd, cmd_dir, log_dir, "manifest", job_id,
+        hold_jobname=hold_jobname)
+
+def write_upload_cmd_and_bsub(subdir, job_id, cmd_dir, log_dir): 
+    pass
+    # hold_jobname = "manifest.{}".format(job_id)
+    # cmd_template = "refget-loader upload {}"
+    # cmd = cmd_template.format(job_id, subdir)
 #     return write_cmd_and_bsub(cmd, cmd_dir, log_dir, "upload", job_id,
 #         hold_jobname=hold_jobname)
 
-def process_flatfile(config_obj, processing_dir, accession, url):
+def process_flatfile(processing_dir, accession, url, config_obj, source_config,
+    destination_config):
     """submit process and upload jobs for a single flatfile
 
     There are 2 components to getting flatfiles to S3: processing via 
@@ -158,14 +155,18 @@ def process_flatfile(config_obj, processing_dir, accession, url):
 
             # create cmd and bsub files for both components:
             # 1. ena-refget-processor
-            # 2. upload
+            # 2. generate manifest from full and loader csv
+            # 3. upload
             process_bsub_file = write_process_cmd_and_bsub(subdir, perl_script,
                 dat_link, url_id, cmd_dir, log_dir)
+            manifest_bsub_file = write_manifest_cmd_and_bsub(subdir, url_id,
+                source_config, destination_config, cmd_dir, log_dir)
             # upload_bsub_file = write_upload_cmd_and_bsub(subdir, url_id, 
             #     cmd_dir, log_dir)
 
             #TODO: un-comment these when ready to execute
             os.system(process_bsub_file)
+            os.system(manifest_bsub_file)
             # os.system(upload_bsub_file)
 
         except Exception as e:

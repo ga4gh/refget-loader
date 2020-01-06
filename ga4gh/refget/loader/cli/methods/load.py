@@ -30,7 +30,7 @@ def load(**kwargs):
         
         source_obj = json.load(open(kwargs["source"]))
         processing_method = METHODS["processing"][source_obj["type"]]
-        processing_method(source_obj)
+        processing_method(source_obj, kwargs["source"], kwargs["destination"])
 
         # destination_obj = json.load(open(kwargs["destination"]))
         # upload_method = METHODS["upload"][destination_obj["type"]]
