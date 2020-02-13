@@ -20,6 +20,7 @@ def manifest(**kwargs):
             ls = line.rstrip().split(",")
             if parse_header:
                 columns = ls
+                parse_header = False
             else:
                 subdict = {columns[i]: ls[i] for i in range(0, len(ls))}
                 csv_dict[subdict["trunc512"]] = subdict
