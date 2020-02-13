@@ -8,10 +8,6 @@ import click
 def manifest(**kwargs):
     "generate an upload manifest from processed ENA flatfile"
 
-    # def parse_csv_header(header_line):
-    #     ls = header_line.rstrip().split(",")
-    #     return {ls[i]: i for i in range(0, len(ls))}
-
     def load_csv(csv_path):
         csv_dict = {}
         columns = []
@@ -58,34 +54,6 @@ def manifest(**kwargs):
             loader_csv_subdict["trunc512"],
             loader_csv_subdict["md5"],
         ]))
-
-    print("full csv dict:")
-    print(full_csv_dict)
-    print("-")
-    print("loader csv dict:")
-    print(loader_csv_dict)
-    print("-")
-    print("output lines:")
-    print(output_lines)
-    print("-")
-
-        
-    # header = True
-    # loader_cols = None
-    # for line in loader_csv.readlines():
-    #     if header:
-    #        loader_cols = parse_loader_columns(line)
-    #          header = False
-    #     else:
-    #         ls = line.rstrip().split(",")
-    #         new_line = "\t".join([
-    #             ls[loader_cols["completed"]],
-    #             ls[loader_cols["seq_path"]],
-    #             ls[loader_cols["json_path"]],
-    #             ls[loader_cols["trunc512"]],
-    #             ls[loader_cols["md5"]]
-    #         ])
-    #         output_lines.append(new_line)
 
     # add additional lines for uploading the .full.csv
     output_lines.append("# additional uploads")
