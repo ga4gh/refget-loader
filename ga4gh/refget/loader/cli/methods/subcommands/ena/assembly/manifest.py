@@ -91,4 +91,4 @@ def manifest(**kwargs):
         "\n".join(output_lines)
     )
     
-    open(output_manifest_path, "w").write("\n".join(output_content) + "\n")
+    open(output_manifest_path, "w").write(output_content)
