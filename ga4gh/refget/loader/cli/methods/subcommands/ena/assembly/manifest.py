@@ -58,6 +58,16 @@ def manifest(**kwargs):
             loader_csv_subdict["md5"],
         ]))
 
+    print("full csv dict:")
+    print(full_csv_dict)
+    print("-")
+    print("loader csv dict:")
+    print(loader_csv_dict)
+    print("-")
+    print("output lines:")
+    print(output_lines)
+    print("-")
+
         
     # header = True
     # loader_cols = None
