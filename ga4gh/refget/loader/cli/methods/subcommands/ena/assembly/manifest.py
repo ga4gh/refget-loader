@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+"""Generate upload manifest from ena-refget-processor results
+
+The ena-refget-processor will produce several loader/log csvs, containing all
+information necessary to upload sequences (by primary checksum and secondary
+checksums) to the object store. This cli command reformats the 
+ena-refget-processor into "manifest" format
+"""
+
 import click
 
 @click.command()
@@ -9,20 +18,33 @@ def manifest(**kwargs):
     "generate an upload manifest from processed ENA flatfile"
 
     def load_csv(csv_path):
+        """Parse csv contents into dictionary
+
+        Arguments:
+            csv_path (str): path to csv file that will be parsed
+
+        Returns:
+            (dict): csv contents loaded as dictionary 
+        """
+
+        row_key = "trunc512"
         csv_dict = {}
         columns = []
         parse_header = True
         for line in open(csv_path, "r"):
             ls = line.rstrip().split(",")
-            if parse_header:
+            if parse_header: # get column keys by their position in the header 
                 columns = ls
                 parse_header = False
-            else:
+            else: # set row according to its trunc512 identifier, also
+                # setting attributes by column key
                 subdict = {columns[i]: ls[i] for i in range(0, len(ls))}
-                csv_dict[subdict["trunc512"]] = subdict
+                csv_dict[subdict[row_key]] = subdict
 
         return csv_dict
 
+    # directories are set by the ena-refget-processor
+    # set directory structure and load the full and loader csvs as dicts 
     processing_dir = kwargs["processing_dir"]
     file_id = kwargs["file_id"]
     logs_dir = processing_dir + "/logs"
@@ -31,6 +53,8 @@ def manifest(**kwargs):
     full_csv_dict = load_csv(full_csv_path)
     loader_csv_dict = load_csv(loader_csv_path)
 
+    # manifest file template, contains paths to source and upload config,
+    # header row, and data rows
     output_manifest_path = logs_dir + "/" + file_id + ".manifest.csv"
     output_content_template = \
         "# Refget loader manifest\n" \
@@ -43,6 +67,9 @@ def manifest(**kwargs):
     ]
     output_lines = []
 
+    # for each row in the loader csv, use the contents of the loader csv
+    # and its matching entry in the full csv to create a manifest entry
+    # add manifest entry to the list
     for trunc512 in loader_csv_dict.keys():
         loader_csv_subdict = loader_csv_dict[trunc512]
         full_csv_subdict = full_csv_dict[trunc512]
@@ -55,7 +82,8 @@ def manifest(**kwargs):
             loader_csv_subdict["md5"],
         ]))
 
-    # add additional lines for uploading the .full.csv
+    # the full csv is uploaded as well, add additional config lines in the
+    # manifest for uploading full csv
     output_lines.append("# additional uploads")
     output_lines.append("\t".join(["source", "destination"]))
     output_lines.append("\t".join([
@@ -63,6 +91,7 @@ def manifest(**kwargs):
         "metadata/csv/" + file_id + ".full.csv"
     ]))
 
+    # populate manifest template and write
     output_content = output_content_template.format(
         kwargs["source_config"],
         kwargs["destination_config"],

@@ -6,8 +6,8 @@ import datetime
 def timestamp():
     """Get the current date and time as an ISO 8601 format string
 
-    :return: ISO 8601 string of current date and time
-    :rtype: str
+    Returns:
+        (str): current time in ISO 8601 format
     """
 
     fmt = "%Y-%m-%dT%H:%M:%S"

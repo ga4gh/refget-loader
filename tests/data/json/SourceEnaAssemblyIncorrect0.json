@@ -1,0 +1,6 @@
+{
+  "type": "ena_assembly",
+  "processing_dir": "/workingdir",
+  "start_date": "2019-08-01",
+  "number_of_days": 1
+}

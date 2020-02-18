@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+"""Validates an JSON file/object matches the appropriate schema"""
+
 import inspect
 import json
 import os
@@ -7,13 +10,36 @@ from ga4gh.refget.loader.config.constants import Status, JsonFiletype
 from ga4gh.refget.loader.config.schemas import SCHEMAS as schema_dict
 
 class Validator(object):
-    """validates an input JSON file matches schema"""
+    """Validates an input JSON file/object matches the appropriate schema
+
+    Attributes:
+        filetype (int): indicates if it will validate "source" or "destination"
+        filepath (str): path to json config file
+    """
 
     def __init__(self, filetype, filepath):
+        """Instantiates a Validator
+
+        Args:
+            filetype (int): indicates "source" or "destination"
+            filepath (str): path to json config file
+        """
+
         self.filetype = filetype
         self.filepath = filepath
 
     def __validate_json_schema(self, schema_filename):
+        """Validate the json instance against the matching schema
+
+        Arguments:
+            schema_filename (str): name of schema file by "type" keyword
+
+        Returns:
+            (dict): validation success/failure status and associated message 
+        """
+
+        # load the correct schema file according to the directory where all
+        # schemas are stored, and the schema filename
         schema_dir = os.path.join(
             os.path.dirname(
                 os.path.dirname(inspect.getmodule(self).__file__)
@@ -33,6 +59,9 @@ class Validator(object):
             "status": Status.SUCCESS,
             "message": ""
         }
+
+        # attempt to validate the json instance against the schema, catching
+        # exceptions if it doesn't validate
         try:
             jsonschema_validate(
                 instance=instance_obj,
@@ -46,6 +75,8 @@ class Validator(object):
         return result
 
     def validate(self):
+        """Validate json instance against matching schema"""
+
         result = {
             "status": Status.SUCCESS,
             "message": ""
@@ -79,17 +110,47 @@ class Validator(object):
                 raise Exception(self.filepath + " JSON schema validation "
                     + "failed:\n" + json_schema_result["message"])
 
+        # catch all exceptions, setting the validation result to a failure
+        # if any exception raised
         except Exception as e:
-            result["status"] = Status.FAILURE,
+            result["status"] = Status.FAILURE
             result["message"] = str(e)
         return result
 
 def validate(filetype, filepath):
+    """Validate a json instance using the Validator class
+
+    Arguments:
+        filetype (int): indicates "source" or "destination"
+        filepath (str): path to json config file
+    
+    Returns:
+        (dict): validation result
+    """
+
     v = Validator(filetype, filepath)
     return v.validate()
 
 def validate_source(filepath):
+    """Validate a source json config file using the Validator class
+
+    Arguments:
+        filepath (str): path to source json config file
+    
+    Returns:
+        (dict) validation result
+    """
+
     return validate(JsonFiletype.SOURCE, filepath)
 
 def validate_destination(filepath):
+    """Validate a destination json config file using the Validator class
+
+    Arguments:
+        filepath (str): path to destination json config file
+    
+    Returns:
+        (dict): validation result
+    """
+
     return validate(JsonFiletype.DESTINATION, filepath)

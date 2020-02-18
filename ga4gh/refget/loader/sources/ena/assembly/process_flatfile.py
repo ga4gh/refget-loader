@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Process all assemblies for a single flatfile"""
+"""Process ENA assemblies associated with a single .dat.gz flatfile"""
 
 import json
 import logging
@@ -10,20 +10,16 @@ def write_cmd_and_bsub(cmd, cmd_dir, log_dir, cmd_name, job_id,
     hold_jobname=None):
     """Write command and bsub files for a single batch job/component
 
-    :param cmd: cli command
-    :type cmd: str
-    :param cmd_dir: path to batch command directory
-    :type cmd_dir: str
-    :param log_dir: path to logs directory
-    :type log_dir: str
-    :param cmd_name: name describing the type of job being undertaken
-    :type cmd_name: str
-    :param job_id: unique id distinguising this run from others of the same type
-    :type job_id: str
-    :param hold_jobname: this job will wait for the specified job to complete
-    :type hold_jobname: str, optional
-    :return: path to bsub command file
-    :rtype: str
+    Arguments:
+        cmd (str): cli command
+        cmd_dir (str): path to batch command directory
+        log_dir (str): path to logs directory
+        cmd_name (str): name describing the type of job being undertaken
+        job_id (str): unique id distinguising this run from others of same type
+        hold_jobname (str): this job will wait for the specified job to complete
+
+    Returns:
+        (str): path to bsub command file
     """
 
     # set full job name from command name and unique id
@@ -52,18 +48,16 @@ def write_process_cmd_and_bsub(subdir, perl_script, file_path, job_id, cmd_dir,
     log_dir):
     """Write batch files for processing (ena-refget-processor) step
 
-    :param subdir: directory where output seqs will be written
-    :type subdir: str
-    :param file_path: path to input .dat flat file
-    :type file_path: str
-    :param job_id: unique id distinguishing it from other process jobs
-    :type job_id: str
-    :param cmd_dir: path to batch command directory
-    :type cmd_dir: str
-    :param log_dir: path to logs directory
-    :type log_dir: str
-    :return: path to bsub command file
-    :rtype: str
+    Arguments:
+        subdir (str): directory where output seqs will be written
+        perl_script (str): path to ena-refget-processor perl script
+        file_path (str): path to input .dat flat file
+        job_id (str): unique id distinguishing it from other process jobs
+        cmd_dir (str): path to batch command directory
+        log_dir (str): path to logs directory
+    
+    Returns:
+        (str) path to bsub command file
     """
 
     cmd_template = "{} --store-path {} --file-path {} --process-id {}"
@@ -72,6 +66,20 @@ def write_process_cmd_and_bsub(subdir, perl_script, file_path, job_id, cmd_dir,
 
 def write_manifest_cmd_and_bsub(subdir, job_id, source_config, 
     destination_config, cmd_dir, log_dir):
+    """Write batch files for producing the upload manifest
+
+    Arguments:
+        subdir (str): directory where output seqs were written
+        job_id (str): unique id of preprocessing run
+        source_config (str): path to source json config
+        destination_config (str): path to destination json config
+        cmd_dir (str): path to batch command directory
+        log_dir (str): path to logs directory
+    
+    Returns:
+        (str): path to bsub command file
+    """
+
     hold_jobname = "process.{}".format(job_id)
     cmd_template = "refget-loader subcommands ena assembly manifest " \
         + "{} {} {} {}"
@@ -79,7 +87,18 @@ def write_manifest_cmd_and_bsub(subdir, job_id, source_config,
     return write_cmd_and_bsub(cmd, cmd_dir, log_dir, "manifest", job_id,
         hold_jobname=hold_jobname)
 
-def write_upload_cmd_and_bsub(manifest, job_id, cmd_dir, log_dir): 
+def write_upload_cmd_and_bsub(manifest, job_id, cmd_dir, log_dir):
+    """Write batch files for uploading files in the file manifest
+
+    Arguments:
+        manifest (str): path to upload manifest file
+        job_id (str): unique id of manifest generation run
+        cmd_dir (str): path to batch command directory
+        log_dir (str): path to logs directory
+
+    Returns:
+        (str): path to bsub command file
+    """
     
     hold_jobname = "manifest.{}".format(job_id)
     cmd_template = "refget-loader upload {}"
@@ -89,19 +108,23 @@ def write_upload_cmd_and_bsub(manifest, job_id, cmd_dir, log_dir):
 
 def process_flatfile(processing_dir, accession, url, config_obj, source_config,
     destination_config):
-    """submit process and upload jobs for a single flatfile
+    """Submit preprocessing, manifest generation, and upload jobs for flatfile
 
-    There are 2 components to getting flatfiles to S3: processing via 
-    ena-refget-processor, and the upload of processed files. These 2 components
-    are submitted as separate batch jobs, where the second job waits until the
-    first has completed.
+    Individual components of processing ENA assemblies and uploading to the 
+    destination in the destination config are split into 3 components:
+    1. process via ena-refget-processor
+    2. generate the file manifest
+    3. upload to destination
+    The three components are submitted as cluster batch jobs, in which each
+    jobs waits for the previous job to finish
 
-    :param processing_dir: directory to write processed files
-    :type processing_dir: str
-    :param accession: unique flatfile accession (from AssemblyScanner list)
-    :type accession: str
-    :param url: FTP url for this flatfile (from AssemblyScanner list)
-    :type url: str
+    Arguments:
+        processing_dir (str): directory to write processed files
+        accession (str): unique flatfile accession (from AssemblyScanner list)
+        url (str): FTP url for this flatfile (from AssemblyScanner list)
+        config_obj (dict): loaded source json config
+        source_config (str): path to source json config
+        destination_config (str): path to destination json config
     """
 
     perl_script = config_obj["ena_refget_processor_script"]
@@ -166,8 +189,7 @@ def process_flatfile(processing_dir, accession, url, config_obj, source_config,
                 source_config, destination_config, cmd_dir, log_dir)
             upload_bsub_file = write_upload_cmd_and_bsub(manifest, url_id, 
                 cmd_dir, log_dir)
-
-            #TODO: un-comment these when ready to execute
+                
             os.system(process_bsub_file)
             os.system(manifest_bsub_file)
             os.system(upload_bsub_file)

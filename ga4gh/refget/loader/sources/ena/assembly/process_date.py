@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Process all assemblies for a single date"""
+"""Process ENA assemblies associated with a single date into refget format"""
 
 import logging
 import os
@@ -10,12 +10,14 @@ from ga4gh.refget.loader.sources.ena.assembly.process_flatfile \
 
 def process_date(date_string, processing_dir, config_obj, source_config,
     destination_config):
-    """process all seqs that were deployed on ena on the same date
+    """Process all ENA assemblies deployed on ena on the same date
 
-    :param date_string: YYYY-MM-DD formatted string, date to scan and process
-    :type date_string: str
-    :param processing_dir: directory to process all seqs for given date
-    :type processing_dir: str
+    Arguments:
+        date_string (str): YYYY-MM-DD, date to scan and process
+        processing_dir (str): directory to process all seqs for given date
+        config_obj (dict): loaded object from source json config
+        source_config (str): path to source json config
+        destination_config (str): path to destination json config
     """
 
     # generate the accession list via AssemblyScanner,

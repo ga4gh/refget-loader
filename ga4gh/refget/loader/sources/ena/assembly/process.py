@@ -1,9 +1,20 @@
+# -*- coding: utf-8 -*-
+"""Process all ENA assemblies over the period specified in the source config"""
+
 import datetime
 import logging
 import os
 from ga4gh.refget.loader.sources.ena.assembly.process_date import process_date
 
 def ena_assembly_process(config_obj, source_config, destination_config):
+    """Process all ENA assemblies over the period specified in the source config
+
+    Arguments:
+        config_obj (dict): loaded source json config
+        source_config (str): path to source json config
+        destination_config (str): path to destination json config
+    """
+
     root_dir = config_obj["processing_dir"]
     date_string = config_obj["start_date"]
     n_days = config_obj["number_of_days"]
