@@ -12,8 +12,7 @@ import click
 @click.command()
 @click.argument("processing_dir")
 @click.argument("file_id")
-@click.argument("source_config")
-@click.argument("destination_config")
+@click.argument("config_file")
 def manifest(**kwargs):
     "generate an upload manifest from processed ENA flatfile"
 
@@ -58,8 +57,7 @@ def manifest(**kwargs):
     output_manifest_path = logs_dir + "/" + file_id + ".manifest.csv"
     output_content_template = \
         "# Refget loader manifest\n" \
-        + "# source config: {}\n" \
-        + "# destination config: {}\n" \
+        + "# config file: {}\n" \
         + "{}\n" \
         + "{}\n"
     output_header = [
@@ -93,8 +91,7 @@ def manifest(**kwargs):
 
     # populate manifest template and write
     output_content = output_content_template.format(
-        kwargs["source_config"],
-        kwargs["destination_config"],
+        kwargs["config_file"],
         "\t".join(output_header),
         "\n".join(output_lines)
     )

@@ -9,14 +9,15 @@ Attributes:
         the "type" property for both source and destination json configs
 """
 
-from ga4gh.refget.loader.config.constants import JsonFiletype
+from ga4gh.refget.loader.config.constants import JsonObjectType
 
 SCHEMAS = {
-    JsonFiletype.SOURCE: {
+
+    JsonObjectType.CONFIG: "config.json",
+    JsonObjectType.SOURCE: {
         "ena_assembly": "ena_assembly.json"
     },
-
-    JsonFiletype.DESTINATION: {
+    JsonObjectType.DESTINATION: {
         "aws_s3": "aws_s3.json"
     }
 }

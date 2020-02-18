@@ -3,7 +3,7 @@
 
 import click
 import json
-from ga4gh.refget.loader.config.methods import METHODS
+from ga4gh.refget.loader.config.sources import SOURCES
 
 @click.command()
 @click.argument("manifest")

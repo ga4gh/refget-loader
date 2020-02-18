@@ -6,26 +6,26 @@ import json
 import os
 from jsonschema import RefResolver, validate as jsonschema_validate
 from jsonschema.exceptions import ValidationError
-from ga4gh.refget.loader.config.constants import Status, JsonFiletype
+from ga4gh.refget.loader.config.constants import Status, JsonObjectType
 from ga4gh.refget.loader.config.schemas import SCHEMAS as schema_dict
 
 class Validator(object):
     """Validates an input JSON file/object matches the appropriate schema
 
     Attributes:
-        filetype (int): indicates if it will validate "source" or "destination"
+        objtype (int): indicates if it will validate "source" or "destination"
         filepath (str): path to json config file
     """
 
-    def __init__(self, filetype, filepath):
+    def __init__(self, objtype, filepath):
         """Instantiates a Validator
 
         Args:
-            filetype (int): indicates "source" or "destination"
+            objtype (int): indicates "source" or "destination"
             filepath (str): path to json config file
         """
 
-        self.filetype = filetype
+        self.objtype = objtype
         self.filepath = filepath
 
     def __validate_json_schema(self, schema_filename):
@@ -41,9 +41,7 @@ class Validator(object):
         # load the correct schema file according to the directory where all
         # schemas are stored, and the schema filename
         schema_dir = os.path.join(
-            os.path.dirname(
-                os.path.dirname(inspect.getmodule(self).__file__)
-            ),
+            os.path.dirname(inspect.getmodule(self).__file__),
             "config",
             "schemas"
         )
@@ -94,17 +92,23 @@ class Validator(object):
             except json.JSONDecodeError as e:
                 raise Exception(self.filepath + " is not valid JSON")
 
-            # validate file contains 'type' property, and has a valid value
-            if "type" not in obj.keys():
-                raise Exception(self.filepath + " missing required 'type' "
-                    + "property")
-            valid_types = schema_dict[self.filetype].keys()
-            if obj["type"] not in valid_types:
-                raise Exception(self.filepath + " contains invalid 'type', "
-                    + "must be one of: " + ",".join(valid_types))
+            if self.objtype in set([JsonObjectType.SOURCE,
+                                    JsonObjectType.DESTINATION]):
+                # validate file contains 'type' property, and has a valid value
+                if "type" not in obj.keys():
+                    raise Exception(self.filepath + " missing required 'type' "
+                        + "property")
+                valid_types = schema_dict[self.objtype].keys()
+                if obj["type"] not in valid_types:
+                    raise Exception(self.filepath + " contains invalid 'type', "
+                        + "must be one of: " + ",".join(valid_types))
             
             # validate file contains the correct properties for specified type
-            schema_filename = schema_dict[self.filetype][obj["type"]]
+            schema_filename = \
+                schema_dict[self.objtype][obj["type"]] \
+                if self.objtype in set([JsonObjectType.SOURCE,
+                                        JsonObjectType.DESTINATION]) \
+                else schema_dict[self.objtype]
             json_schema_result = self.__validate_json_schema(schema_filename)
             if json_schema_result["status"] != Status.SUCCESS:
                 raise Exception(self.filepath + " JSON schema validation "
@@ -116,41 +120,3 @@ class Validator(object):
             result["status"] = Status.FAILURE
             result["message"] = str(e)
         return result
-
-def validate(filetype, filepath):
-    """Validate a json instance using the Validator class
-
-    Arguments:
-        filetype (int): indicates "source" or "destination"
-        filepath (str): path to json config file
-    
-    Returns:
-        (dict): validation result
-    """
-
-    v = Validator(filetype, filepath)
-    return v.validate()
-
-def validate_source(filepath):
-    """Validate a source json config file using the Validator class
-
-    Arguments:
-        filepath (str): path to source json config file
-    
-    Returns:
-        (dict) validation result
-    """
-
-    return validate(JsonFiletype.SOURCE, filepath)
-
-def validate_destination(filepath):
-    """Validate a destination json config file using the Validator class
-
-    Arguments:
-        filepath (str): path to destination json config file
-    
-    Returns:
-        (dict): validation result
-    """
-
-    return validate(JsonFiletype.DESTINATION, filepath)

@@ -12,13 +12,17 @@ class Status(object):
     SUCCESS = 1
     FAILURE = -1
 
-class JsonFiletype(object):
-    """Constants related to different json files
+class JsonObjectType(object):
+    """Constants related to different json objects in the config
 
     Attributes:
-        SOURCE (int): integer related to the "source" json config file
-        DESTINATION (int): integer related to the "destination" json config file
+        CONFIG (int): integer related to overall config file
+        SOURCE (int): integer related to "source" property in config
+        DESTINATION (int): integer related to "destination" property in config
+        RUNTIME (int): integer related to "runtime" property in config
     """
 
-    SOURCE = 0
-    DESTINATION = 1
+    CONFIG = 0
+    SOURCE = 1
+    DESTINATION = 2
+    RUNTIME = 3
