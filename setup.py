@@ -1,7 +1,7 @@
 import setuptools
 import codecs
 
-NAME = "ena-refget-scheduler"
+NAME = "refget-loader"
 VERSION = "0.1.0"
 AUTHOR = "Jeremy Adams"
 EMAIL = "jeremy.adams@ga4gh.org"
@@ -17,7 +17,10 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 install_requires = [
-    "awscli", "click", "requests"
+    "awscli", 
+    "click",
+    "jsonschema",
+    "requests"
 ]
 
 setuptools.setup(
@@ -29,13 +32,18 @@ setuptools.setup(
         + "public dataset",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/ga4gh/ena-refget-scheduler",
-    package_data={'': ['*.ini']},
+    url="https://github.com/ga4gh/refget-loader",
+    package_data={
+        '': [
+            '*.ini', 
+            'refget/loader/config/schemas/*.json'
+        ]
+    },
     packages=setuptools.find_packages(),
     install_requires=install_requires,
     entry_points={
         "console_scripts": [
-            'ena-refget-scheduler=ga4gh.refget.ena.cli.entrypoint:main',
+            'refget-loader=ga4gh.refget.loader.cli.entrypoint:main',
         ]
     }
     ,

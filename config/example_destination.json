@@ -1,0 +1,5 @@
+{
+  "type": "aws_s3",
+  "bucket_name": "insdc-mirror",
+  "profile": "ga4gh-insdc"
+}

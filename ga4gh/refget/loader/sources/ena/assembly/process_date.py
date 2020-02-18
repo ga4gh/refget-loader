@@ -3,11 +3,13 @@
 
 import logging
 import os
-from ga4gh.refget.ena.utils.assembly_scanner import AssemblyScanner
-from ga4gh.refget.ena.utils.processing.single_flatfile \
-    import process_single_flatfile
+from ga4gh.refget.loader.sources.ena.assembly.utils.assembly_scanner \
+    import AssemblyScanner
+from ga4gh.refget.loader.sources.ena.assembly.process_flatfile \
+    import process_flatfile
 
-def process_single_date(date_string, processing_dir):
+def process_date(date_string, processing_dir, config_obj, source_config,
+    destination_config):
     """process all seqs that were deployed on ena on the same date
 
     :param date_string: YYYY-MM-DD formatted string, date to scan and process
@@ -41,4 +43,5 @@ def process_single_date(date_string, processing_dir):
             accessions_urls.append([accession, url])
     
     for accession, url in accessions_urls:
-        process_single_flatfile(processing_dir, accession, url)
+        process_flatfile(processing_dir, accession, url, config_obj, 
+            source_config, destination_config)
