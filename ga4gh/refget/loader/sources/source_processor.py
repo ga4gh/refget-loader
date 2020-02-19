@@ -5,7 +5,7 @@ class SourceProcessor(object):
 
     def __init__(self, config_file, config):
 
-        self.config_file = config_file,
+        self.config_file = config_file
         self.config = config
         self.sourcetype = self.config["type"]
     
@@ -20,12 +20,12 @@ class SourceProcessor(object):
 
     def write_cmd_and_get_job(self, cmd, cmdpath, jobid, hold_jobid):
         open(cmdpath, "w").write(cmd)
-        job = Job(cmdpath, jobid, hold_jobid)
+        job = Job(cmdpath, jobid, hold_jobid=hold_jobid)
         return job
 
-    def upload_job(self, cmddir, manifest_file, jobname, jobid, hold_jobid):
+    def upload_job(self, cmddir, manifest_file, jobid, hold_jobid):
         cmd_template = "refget-loader upload {}"
         cmd = cmd_template.format(manifest_file)
-        cmdfile = "{}.{}.sh".format(jobname, jobid)
+        cmdfile = jobid + ".sh"
         cmdpath = os.path.join(cmddir, cmdfile)
         return self.write_cmd_and_get_job(cmd, cmdpath, jobid, hold_jobid)

@@ -9,6 +9,7 @@ from ga4gh.refget.loader.sources.ena.assembly.functions.time import timestamp
 from ga4gh.refget.loader.sources.ena.assembly.utils.assembly_scanner \
     import AssemblyScanner
 from ga4gh.refget.loader.sources.source_processor import SourceProcessor
+from ga4gh.refget.loader.jobset_status import JobsetStatus
 
 class ENAAssemblyProcessor(SourceProcessor):
 
@@ -21,6 +22,8 @@ class ENAAssemblyProcessor(SourceProcessor):
 
     def prepare_commands(self):
         """Get commands to process assemblies over the specified period"""
+
+        all_jobs = []
 
         root_dir = self.processing_dir
         date_string = self.start_date
@@ -42,7 +45,7 @@ class ENAAssemblyProcessor(SourceProcessor):
             logging.info("logs for sequences uploaded on: " + date_string)
 
             # processing method
-            self.prepare_single_date_commands(date_string, sub_dir)
+            all_jobs += self.prepare_single_date_commands(date_string, sub_dir)
 
             # create the next date and update the config file
             date = datetime.date(*[int(a) for a in [year, month, day]])
@@ -54,6 +57,8 @@ class ENAAssemblyProcessor(SourceProcessor):
             # remove logging handler so new log file is written to the next date
             for handler in logging.root.handlers:
                 logging.root.removeHandler(handler)
+        
+        return all_jobs
     
     def prepare_single_date_commands(self, date_string, processing_dir):
         """Get commands to process ENA assemblies deployed on the same date
@@ -62,6 +67,8 @@ class ENAAssemblyProcessor(SourceProcessor):
             date_string (str): YYYY-MM-DD, date to scan and process
             processing_dir (str): directory to process all seqs for given date
         """
+
+        date_jobs = [] # array of job objects
 
         # generate the accession list via AssemblyScanner,
         # if accession list already exists, skip list re-generation
@@ -88,8 +95,11 @@ class ENAAssemblyProcessor(SourceProcessor):
                 accessions_urls.append([accession, url])
         
         for accession, url in accessions_urls:
-            self.prepare_single_flatfile_commands(processing_dir, accession,
-                                                  url)
+            flatfile_jobs = self.prepare_single_flatfile_commands(
+                processing_dir, accession, url)
+            date_jobs += flatfile_jobs
+        
+        return date_jobs
     
     def prepare_single_flatfile_commands(self, processing_dir, accession, url):
         """Get commands to process and generate manifest for single flatfile
@@ -110,15 +120,15 @@ class ENAAssemblyProcessor(SourceProcessor):
             destination_config (str): path to destination json config
         """
 
-        perl_script = self.ena_refget_processor_script
+        flatfile_jobs = []
         logging.debug("{} - flatfile process attempt".format(accession))
 
         # create the processing sub-directory to prevent too many files in 
         # NFS filesystem
         # create directory to hold batch commands and logs
         url_basename = os.path.basename(url)
-        url_id = url_basename.split(".")[0]
-        subdir = os.path.join(processing_dir, "files", url_basename[:2], url_id)
+        urlid = url_basename.split(".")[0]
+        subdir = os.path.join(processing_dir, "files", url_basename[:2], urlid)
         cmd_dir = os.path.join(subdir, "cmd")
         log_dir = os.path.join(subdir, "log")
         for d in [subdir, cmd_dir, log_dir]:
@@ -127,21 +137,17 @@ class ENAAssemblyProcessor(SourceProcessor):
 
         # initialize the status if the file hasn't been created, otherwise load
         # status from the file
-        status_fp = os.path.join(subdir, "status.json")
-        status_dict = {
-            "accession": accession,
-            "url": url,
-            "status": "NotAttempted",
-            "message": "None",
-            "last_modified": timestamp()
-        }
-        if os.path.exists(status_fp):
-            status_dict = json.loads(open(status_fp, "r").read())
-
+        jobset_status_filepath = os.path.join(subdir, "status.json")
+        jobset_status = JobsetStatus(jobset_status_filepath)
+        jobset_status.set_objectid(accession)
+        
         # only execute if status is not "Completed"
-        if status_dict["status"] != "Completed":
+        if not jobset_status.is_success():
             try:
-                status_dict["status"] = "InProgress"
+                jobset_status.set_status_running()
+                jobset_status.set_data("url", url)
+                jobset_status.set_data("processid", urlid)
+                jobset_status.set_message("")
 
                 # the ftp url maps to a local file path onsite, we do not need
                 # to download the flatfile to process
@@ -159,51 +165,49 @@ class ENAAssemblyProcessor(SourceProcessor):
                     os.remove(dat_link)
                 os.symlink(dat_orig, dat_link)
 
-                manifest = subdir + "/" + "/logs/" + url_id \
-                    + ".manifest.csv"
+                manifest = os.path.join(subdir, "logs", urlid + ".manifest.csv")
 
                 # create cmd files for components:
                 # 1. ena-refget-processor
                 # 2. generate manifest from full and loader csv
                 # 3. upload
-                process_cmdfile = self.write_process_cmd(subdir, cmd_dir,
-                    dat_link, url_id)
-                manifest_cmdfile = self.write_manifest_cmd(subdir, cmd_dir, 
-                    url_id)
-                upload_cmdfile = self.write_upload_cmd(cmd_dir, manifest,
-                    "ena_assembly.upload", url_id)
+                jobid_template = "ena_assembly.{}.{}"
+                process_jobid = jobid_template.format("process", urlid)
+                manifest_jobid = jobid_template.format("manifest", urlid)
+                upload_jobid = jobid_template.format("upload", urlid)
+
+                process_job = self.process_job(subdir, cmd_dir,
+                    dat_link, urlid, process_jobid)
+                manifest_job = self.manifest_job(subdir, cmd_dir, urlid, 
+                    manifest_jobid, process_jobid)
+                upload_job = self.upload_job(cmd_dir, manifest, upload_jobid,
+                    manifest_jobid)
+                flatfile_jobs = [process_job, manifest_job, upload_job]
 
             except Exception as e:
                 # any exceptions in the above will set the status to "Failed",
                 # to be retried later
-                status_dict["status"] = "Failed"
-                status_dict["message"] = str(e)
+                jobset_status.set_status_failure()
+                jobset_status.set_message(str(e))
                 logging.error("{} - flatfile process attempt failed: {}".format(
                     accession, str(e)))
             finally:
                 # write the status dictionary to the status file
-                status_dict["last_modified"] = timestamp()
-                open(status_fp, "w").write(
-                    json.dumps(status_dict, indent=4, sort_keys=True) + "\n")
+                jobset_status.write()
+                return flatfile_jobs
     
-    def process_job(self, subdir, cmddir, dat_file, job_id):
+    def process_job(self, subdir, cmddir, dat_file, processid, jobid):
         cmd_template = "{} --store-path {} --file-path {} --process-id {}"
-        cmd = cmd_template.format(
-            self.ena_refget_processor_script,
-            subdir,
-            dat_file,
-            job_id
-        )
-        cmdfile = "ena_assembly.process.%s.sh" % job_id
+        cmd = cmd_template.format(self.ena_refget_processor_script, subdir,
+            dat_file, processid)
+        cmdfile = jobid + ".sh"
         cmdpath = os.path.join(cmddir, cmdfile)
-        open(cmdpath, "w").write(cmd)
-        return cmdpath
+        return self.write_cmd_and_get_job(cmd, cmdpath, jobid, None)
     
-    def manifest_job(self, subdir, cmddir, job_id):
+    def manifest_job(self, subdir, cmddir, processid, jobid, hold_jobid):
         cmd_template = "refget-loader subcommands ena assembly manifest " \
             + "{} {} {}"
-        cmd = cmd_template.format(subdir, job_id, self.config_file)
-        cmdfile = "ena_assembly.manifest.%s.sh" % job_id
+        cmd = cmd_template.format(subdir, processid, self.config_file)
+        cmdfile = jobid + ".sh"
         cmdpath = os.path.join(cmddir, cmdfile)
-        open(cmdpath, "w").write(cmd)
-        return cmdpath
+        return self.write_cmd_and_get_job(cmd, cmdpath, jobid, hold_jobid)

@@ -64,24 +64,20 @@ def load(**kwargs):
         
     
     try:
-        print("validating:")
         validate_config()
-        print("instantiating loader")
         loader = RefgetLoader(kwargs["config"])
         loader.prepare_processing_jobs()
+        loader.execute_jobs()
         
     except Exception as e:
         print(e)
 
 
         
-        """
-        # load the correct processing method according to the source config,
-        # then execute it
-        source_obj = json.load(open(kwargs["source"]))
-        processing_method = METHODS["processing"][source_obj["type"]]
-        processing_method(source_obj, kwargs["source"], kwargs["destination"])
-        """
-
-    except Exception as e:
-        print(e)
+    """
+    # load the correct processing method according to the source config,
+    # then execute it
+    source_obj = json.load(open(kwargs["source"]))
+    processing_method = METHODS["processing"][source_obj["type"]]
+    processing_method(source_obj, kwargs["source"], kwargs["destination"])
+    """

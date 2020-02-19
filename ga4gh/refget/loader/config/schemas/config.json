@@ -14,7 +14,7 @@
         "destination": {
           "type": "object"
         },
-        "runtime": {
+        "environment": {
           "type": "string",
           "enum": [
             "local",
@@ -25,7 +25,7 @@
       "required": [
         "source",
         "destination",
-        "runtime"
+        "environment"
       ]
     }
   }
