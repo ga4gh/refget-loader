@@ -4,7 +4,7 @@ from ga4gh.refget.loader.environments.environment import Environment
 class LocalEnvironment(Environment):
 
     def __init__(self):
-        super(LocalEnvironment, self).__init__()
+        super(LocalEnvironment).__init__()
     
     def execute_job(self, job):
         cmd = job.get_cmd()

@@ -62,7 +62,7 @@ def manifest(**kwargs):
 
             # manifest file template, contains paths to source and upload 
             # config, header row, and data rows
-            output_manifest_path = os.path.join(logs_dir, 
+            output_manifest_path = os.path.join(processing_dir, 
                 file_id + ".manifest.csv")
             output_content_template = \
                 "# Refget loader manifest\n" \

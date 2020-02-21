@@ -20,7 +20,7 @@ class RefgetLoader(object):
     
     def __get_source_processor(self):
         source_class = SOURCES[self.config["source"]["type"]]
-        source_obj = source_class(self.config_file, self.config["source"])
+        source_obj = source_class(self.config_file, self.config)
         return source_obj
     
     def __get_destination_uploader(self):

@@ -15,10 +15,11 @@ class ENAAssemblyProcessor(SourceProcessor):
 
     def __init__(self, config_file, config):
         super(ENAAssemblyProcessor, self).__init__(config_file, config)
-        self.ena_refget_processor_script = config["ena_refget_processor_script"]
-        self.processing_dir = config["processing_dir"]
-        self.start_date = config["start_date"]
-        self.number_of_days = config["number_of_days"]
+        self.ena_refget_processor_script = \
+            self.source_config["ena_refget_processor_script"]
+        self.processing_dir = self.source_config["processing_dir"]
+        self.start_date = self.source_config["start_date"]
+        self.number_of_days = self.source_config["number_of_days"]
 
     def prepare_commands(self):
         """Get commands to process assemblies over the specified period"""
@@ -74,13 +75,9 @@ class ENAAssemblyProcessor(SourceProcessor):
         # if accession list already exists, skip list re-generation
         accession_list_file = os.path.join(
             processing_dir, "accessions_list.txt")
-        if os.path.exists(accession_list_file):
-            logging.info("accessions list already exists, skipping accession "
-                        + "search")
-        else:
-            logging.info("generating accessions list from search API scan")
-            scanner = AssemblyScanner(date_string)
-            scanner.generate_accession_list(accession_list_file)
+        logging.info("generating accessions list from search API scan")
+        scanner = AssemblyScanner(date_string)
+        scanner.generate_accession_list(accession_list_file)
 
         # for each accession (line) in the list file, send the accession and url
         # to the process_single_flatfile method
@@ -165,7 +162,7 @@ class ENAAssemblyProcessor(SourceProcessor):
                     os.remove(dat_link)
                 os.symlink(dat_orig, dat_link)
 
-                manifest = os.path.join(subdir, "logs", urlid + ".manifest.csv")
+                manifest = os.path.join(subdir, urlid + ".manifest.csv")
 
                 # create cmd files for components:
                 # 1. ena-refget-processor
@@ -180,8 +177,8 @@ class ENAAssemblyProcessor(SourceProcessor):
                     dat_link, urlid, process_jobid)
                 manifest_job = self.manifest_job(subdir, cmd_dir, urlid, 
                     manifest_jobid, process_jobid)
-                upload_job = self.upload_job(cmd_dir, manifest, upload_jobid,
-                    manifest_jobid)
+                upload_job = self.upload_job(cmd_dir, self.desttype,
+                    manifest, upload_jobid, manifest_jobid)
                 flatfile_jobs = [process_job, manifest_job, upload_job]
 
             except Exception as e:
