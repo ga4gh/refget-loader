@@ -11,7 +11,8 @@ class EBIEnvironment(Environment):
     
     def prep_bsub_command(self, job):
         cmddir = os.path.dirname(job.get_cmdfile())
-        logdir = os.path.join(os.path.dirname(cmddir), "logs")
+        logdir = os.path.join(os.path.dirname(cmddir), "log")
+        os.makedirs(logdir) if not os.path.exists(logdir) else None
 
         bsub_params = {
             "outlog": os.path.join(logdir, job.jobid + ".log.out"),
