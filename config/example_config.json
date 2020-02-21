@@ -1,0 +1,15 @@
+{
+  "source": {
+    "type": "ena_assembly",
+    "ena_refget_processor_script": "/Users/jadams/Github/andrewyatz/ena-refget-processor/bin/load_expanded_con.pl",
+    "processing_dir": "/Users/jadams/Test/200218-refget-loader",
+    "start_date": "2019-08-01",
+    "number_of_days": 1
+  },
+  "destination": {
+    "type": "aws_s3",
+    "bucket_name": "insdc-mirror",
+    "profile": "ga4gh-insdc"
+  },
+  "environment": "EBI"
+}

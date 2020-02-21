@@ -5,9 +5,6 @@ import click
 from ga4gh.refget.loader.cli.methods.load import load
 from ga4gh.refget.loader.cli.methods.subcommands import subcommands
 from ga4gh.refget.loader.cli.methods.upload import upload
-# from ga4gh.refget.ena.cli.methods.checkpoint import checkpoint
-# from ga4gh.refget.ena.cli.methods.schedule import schedule
-# from ga4gh.refget.ena.cli.methods.settings import settings
 
 @click.group()
 def main():
@@ -16,7 +13,3 @@ def main():
 main.add_command(load)
 main.add_command(subcommands)
 main.add_command(upload)
-# main.add_command(checkpoint)
-# main.add_command(schedule)
-# main.add_command(settings)
-

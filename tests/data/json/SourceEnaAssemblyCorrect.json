@@ -1,0 +1,7 @@
+{
+  "type": "ena_assembly",
+  "ena_refget_processor_script": "/path/to/script.pl",
+  "processing_dir": "/workingdir",
+  "start_date": "2019-08-01",
+  "number_of_days": 1
+}

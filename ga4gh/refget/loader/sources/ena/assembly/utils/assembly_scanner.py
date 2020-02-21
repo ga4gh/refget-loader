@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Defines AssemblyScanner class, uses ENA search API to find assemblies"""
+"""AssemblyScanner uses ENA search API to find assemblies"""
 
 import datetime
 import logging
@@ -18,20 +18,20 @@ class AssemblyScanner(object):
     accessions by date. The accessions list can be used as input to the 
     ena-refget-processor.
 
-    :param date_string: YYYY-MM-DD date string used to define search window
-    :type date_string: str
-    :param url: base url to ENA assembly search API
-    :type url: str
-    :param query_template: url query string template
-    :type query_template: str
-    :param query: mature query string, modified from template with current date
-    :type query: str
-    :param chunk_size: size (bytes) of each chunk in response stream
-    :type chunk_size: int
+    Attributes:
+        date_string (str): YYYY-MM-DD date string used to define search window
+        url (str): base url to ENA assembly search API
+        query_template (str): url query string template
+        query (str): mature query string with passed date
+        chunk_size (int): size (bytes) of each chunk in response stream
     """
     
     def __init__(self, date_string):
-        """Constructor method"""
+        """Instantiates an AssemblyScanner object
+
+        Arguments:
+            date_string (str): YYYY-MM-DD date string, the search window
+        """
 
         self.date_string = date_string
         self.url = "https://www.ebi.ac.uk/ena/data/warehouse/search"
@@ -43,8 +43,8 @@ class AssemblyScanner(object):
     def get_params(self):
         """Get all data parameters for the search request
 
-        :return: url parameters
-        :rtype: dict[str, str]
+        Returns:
+            (dict): url parameters
         """
 
         return {
@@ -57,8 +57,8 @@ class AssemblyScanner(object):
     def get_headers(self):
         """Get all headers for the search request
 
-        :return: HTTP headers
-        :rtype: dict[str, str]
+        Returns:
+            (dict): HTTP headers
         """
 
         return {
@@ -68,8 +68,8 @@ class AssemblyScanner(object):
     def make_request(self):
         """Execute request to the ENA search API
 
-        :return: HTTP response from search request
-        :rtype: class:`requests.models.Response`
+        Returns:
+            (Response): HTTP response from search request
         """
 
         return requests.post(
@@ -123,8 +123,8 @@ class AssemblyScanner(object):
     def generate_accession_list(self, file_path):
         """Writes assembly accessions to list file
 
-        :param file_path: path to write output file
-        :type file_path: str
+        Arguments:
+            file_path (str): path to write output file
         """
 
         # open the new file and write list header
@@ -167,8 +167,8 @@ class AssemblyScanner(object):
     def __initialize_query(self):
         """Format the query string template with date string of interest
 
-        :return: mature query string, will search assemblies for specified date
-        :rtype: str
+        Returns:
+            (str): mature query string, searches assemblies for specified date
         """
 
         # get the specified date, as well as the next date

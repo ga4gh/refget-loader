@@ -1,0 +1,6 @@
+{
+  "processing_dir": "/workingdir",
+  "ena_refget_processor_script": "/path/to/script.pl",
+  "start_date": "2019-08-01",
+  "number_of_days": 1
+}

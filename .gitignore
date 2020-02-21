@@ -1,5 +1,8 @@
 *.egg-info
 __pycache__
+.coverage
+.source.json
+.destination.json
 .vscode
 build
 dist

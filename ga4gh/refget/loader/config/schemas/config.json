@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$id": "https://github.com/ga4gh/refget-loader/tree/master/ga4gh/refget/loader/config/schemas/config.json",
+  "title": "RefgetLoaderConfig",
+  "type": "object",
+  "$ref": "config.json#/definitions/RefgetLoaderConfig",
+  "definitions": {
+    "RefgetLoaderConfig": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "object"
+        },
+        "destination": {
+          "type": "object"
+        },
+        "environment": {
+          "type": "string",
+          "enum": [
+            "local",
+            "EBI"
+          ]
+        }
+      },
+      "required": [
+        "source",
+        "destination",
+        "environment"
+      ]
+    }
+  }
+}
