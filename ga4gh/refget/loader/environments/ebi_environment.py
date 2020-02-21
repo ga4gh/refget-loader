@@ -25,6 +25,7 @@ class EBIEnvironment(Environment):
         bsub_cmd = self.bsub_template.format(**bsub_params)
         bsub_cmdfile = os.path.join(cmddir, job.jobid + ".bsub")
         open(bsub_cmdfile, "w").write(bsub_cmd)
+        os.chmod(job.get_cmdfile(), stat.S_IRWXU)
         os.chmod(bsub_cmdfile, stat.S_IRWXU)
         return bsub_cmdfile
         
