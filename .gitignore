@@ -6,5 +6,5 @@ __pycache__
 .vscode
 build
 dist
-tests/data/output
+tests/data/output/*
 !tests/data/output/.file
