@@ -1,20 +1,43 @@
 # -*- coding: utf-8 -*-
-"""Process all ENA assemblies over the period specified in the source config"""
+"""SourceProcessor subclass, process all ENA assemblies specified period
+
+The ENAAssemblyProcessor SourceProcessor subclass will process all ENA
+assemblies uploaded to ENA on certain date(s) into refget format, then upload
+to specified destination.
+"""
 
 import datetime
 import json
 import logging
 import os
+from ga4gh.refget.loader.jobset_status import JobsetStatus
+from ga4gh.refget.loader.sources.source_processor import SourceProcessor
 from ga4gh.refget.loader.sources.ena.assembly.functions.time import timestamp
 from ga4gh.refget.loader.sources.ena.assembly.utils.assembly_scanner \
     import AssemblyScanner
-from ga4gh.refget.loader.sources.source_processor import SourceProcessor
-from ga4gh.refget.loader.jobset_status import JobsetStatus
+
 
 class ENAAssemblyProcessor(SourceProcessor):
+    """Process ENA Assembly sequences into refget format
+
+    Attributes:
+        ena_refget_processor_script (str): path to ena processor script
+        processing_dir (str): top-level processing/working directory
+        start_date (str): YYYY-MM-DD day to start scanning for assemblies
+        number_of_days (int): how many days to scan for assemblies (from start)
+    """
 
     def __init__(self, config_file, config):
+        """Instantiate an ENAAssemblyProcessor object
+
+        Arguments:
+            config_file (str): path to json config file
+            config (str): load json config
+        """
+
         super(ENAAssemblyProcessor, self).__init__(config_file, config)
+
+        # set ENAAssembly-specific properties according to config file contents
         self.ena_refget_processor_script = \
             self.source_config["ena_refget_processor_script"]
         self.processing_dir = self.source_config["processing_dir"]
@@ -22,7 +45,11 @@ class ENAAssemblyProcessor(SourceProcessor):
         self.number_of_days = self.source_config["number_of_days"]
 
     def prepare_commands(self):
-        """Get commands to process assemblies over the specified period"""
+        """Get Jobs to process assemblies over the specified period
+
+        Returns:
+            (list): list of all prepared cli Jobs
+        """
 
         all_jobs = []
 
@@ -30,6 +57,8 @@ class ENAAssemblyProcessor(SourceProcessor):
         date_string = self.start_date
         n_days = self.number_of_days
 
+        # for each day, starting from the start date, incrementing by 1 until
+        # the number of days has been reached
         for i in range(0, n_days):
             year, month, day = date_string.split("-")
         
@@ -45,7 +74,8 @@ class ENAAssemblyProcessor(SourceProcessor):
             )
             logging.info("logs for sequences uploaded on: " + date_string)
 
-            # processing method
+            # get all processing jobs for a single day and add to overall
+            # jobs list
             all_jobs += self.prepare_single_date_commands(date_string, sub_dir)
 
             # create the next date and update the config file
@@ -55,7 +85,7 @@ class ENAAssemblyProcessor(SourceProcessor):
             date_string = next_date_string
             logging.info("set checkpoint date to " + next_date_string)
 
-            # remove logging handler so new log file is written to the next date
+            # remove logging handler, new log file is written to the next date
             for handler in logging.root.handlers:
                 logging.root.removeHandler(handler)
         
@@ -67,6 +97,9 @@ class ENAAssemblyProcessor(SourceProcessor):
         Arguments:
             date_string (str): YYYY-MM-DD, date to scan and process
             processing_dir (str): directory to process all seqs for given date
+
+        Returns:
+            (list): list of all prepared cli Jobs for a single date 
         """
 
         date_jobs = [] # array of job objects
@@ -79,8 +112,8 @@ class ENAAssemblyProcessor(SourceProcessor):
         scanner = AssemblyScanner(date_string)
         scanner.generate_accession_list(accession_list_file)
 
-        # for each accession (line) in the list file, send the accession and url
-        # to the process_single_flatfile method
+        # for each accession (line) in the list file, send the accession and
+        # url to the process_single_flatfile method
         accessions_urls = []
         header = True
         for line in open(accession_list_file, "r"):
@@ -105,16 +138,17 @@ class ENAAssemblyProcessor(SourceProcessor):
         destination in the destination config are split into 2 components:
         1. process via ena-refget-processor
         2. generate the file manifest
+        3. upload seqs in file manifest to destination
         The jobs generated from both components are returned and passed to the
-        runtime layer
+        runtime layer/execution context
 
         Arguments:
             processing_dir (str): directory to write processed files
             accession (str): unique flatfile accession (AssemblyScanner list)
             url (str): FTP url for this flatfile (from AssemblyScanner list)
-            config_obj (dict): loaded source json config
-            source_config (str): path to source json config
-            destination_config (str): path to destination json config
+
+        Returns:
+            (list): 3 Jobs for processing and uploading a single flatfile
         """
 
         flatfile_jobs = []
@@ -194,6 +228,19 @@ class ENAAssemblyProcessor(SourceProcessor):
                 return flatfile_jobs
     
     def process_job(self, subdir, cmddir, dat_file, processid, jobid):
+        """Write cli command to process sequences into refget format
+
+        Arguments:
+            subdir (str): flatfile-specific working directory
+            cmddir (str): directory to write cli command file
+            dat_file (str): path to .dat.gz flatfile to be processed
+            processid (str): unique process id for ena-refget-processor
+            jobid (str): unique identifier for process Job 
+        
+        Returns:
+            (Job): Job for processing flatfile by ena-refget-processor
+        """
+
         cmd_template = "{} --store-path {} --file-path {} --process-id {}"
         cmd = cmd_template.format(self.ena_refget_processor_script, subdir,
             dat_file, processid)
@@ -202,6 +249,17 @@ class ENAAssemblyProcessor(SourceProcessor):
         return self.write_cmd_and_get_job(cmd, cmdpath, jobid, None)
     
     def manifest_job(self, subdir, cmddir, processid, jobid, hold_jobid):
+        """Write cli command to generate file manifest from processor output
+
+        Arguments:
+            subdir (str): flatfile-specific working directory
+            cmddir (str): directory to write cli command file
+            dat_file (str): path to .dat.gz flatfile to be processed
+            processid (str): unique process id for manifest generation
+            jobid (str): unique identifier for manifest Job
+            hold_jobid (str): id for process Job to wait on
+        """
+
         cmd_template = "refget-loader subcommands ena assembly manifest " \
             + "{} {} {}"
         cmd = cmd_template.format(subdir, processid, self.config_file)

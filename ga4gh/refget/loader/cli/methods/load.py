@@ -62,7 +62,6 @@ def load(**kwargs):
         validate_single_config(JsonObjectType.SOURCE, source_path)
         validate_single_config(JsonObjectType.DESTINATION, dest_path)
         
-    
     try:
         validate_config()
         loader = RefgetLoader(kwargs["config"])
@@ -71,13 +70,3 @@ def load(**kwargs):
         
     except Exception as e:
         print(e)
-
-
-        
-    """
-    # load the correct processing method according to the source config,
-    # then execute it
-    source_obj = json.load(open(kwargs["source"]))
-    processing_method = METHODS["processing"][source_obj["type"]]
-    processing_method(source_obj, kwargs["source"], kwargs["destination"])
-    """

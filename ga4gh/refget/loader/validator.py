@@ -73,7 +73,11 @@ class Validator(object):
         return result
 
     def validate(self):
-        """Validate json instance against matching schema"""
+        """Validate json instance against matching schema
+
+        Returns:
+            (dict): validation result and message
+        """
 
         result = {
             "status": Status.SUCCESS,

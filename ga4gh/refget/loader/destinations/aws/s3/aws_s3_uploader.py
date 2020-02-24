@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Upload processed refget seqs to AWS S3 bucket from file manifest
 
-This module contains a "destination" upload method, which submits processed
+This module contains a "destination" upload class, which submits processed
 refget seqs to a remote object store based on the seqs contains in the file
 manifest. This method submits seqs to an AWS S3 bucket.
 The bytes for each reference sequence are stored in an object named according
@@ -16,8 +16,22 @@ from ga4gh.refget.loader.destinations.uploader import Uploader
 from ga4gh.refget.loader.jobset_status import JobsetStatus
 
 class AwsS3Uploader(Uploader):
+    """Upload processed refget seqs to AWS S3 bucket from file manifest
+
+    Attributes:
+        put_object_template (str): awscli put/upload cli command template
+        put_primary_template (str): upload by primary id (hold sequence bytes)
+        put_secondary_template (str): upload by secondary id (redirects)
+        base_config (dict): parameters to populate command templates
+    """
     
     def __init__(self, manifest):
+        """Instantiate an AwsS3Uploader object
+
+        Arguments:
+            manifest (str): path to sequence manifest file 
+        """
+
         super(AwsS3Uploader, self).__init__(manifest)
 
         # generic template for putting a seq on s3 
@@ -45,16 +59,37 @@ class AwsS3Uploader(Uploader):
             else ""
     
     def upload_seq_entry(self, entry):
+        """Upload a single manifest sequence entry to S3
+
+        Arguments:
+            entry (str): entry in manifest sequence table
+
+        Returns:
+            (list): exit codes for multiple upload subprocesses
+        """
+
         return self.__upload_manifest_entry(entry)
     
     def upload_additional_entry(self, entry):
+        """Upload a single manifest additional entry to S3
+
+        Arguments:
+            entry (str): entry in manifest additional table
+        
+        Returns:
+            (list): exit codes for upload subprocesses
+        """
+
         return self.__upload_additional_entry(entry)
         
     def __upload_manifest_entry(self, line):
-        """upload a single manifest entry/reference sequence to S3
+        """Upload a single manifest entry/reference sequence to S3
 
         Arguments:
-            line (str): manifest entry
+            line (str): manifest sequence entry/line
+
+        Returns:
+            (list): exit codes for multiple upload subprocesses
         """
 
         ecs = [] # exit codes
@@ -93,6 +128,9 @@ class AwsS3Uploader(Uploader):
 
         Arguments:
             kwargs (dict): parameters to format the aws upload cli command
+        
+        Returns:
+            (int): exit status code 
         """
 
         kwargs.update(self.base_config)
@@ -103,6 +141,9 @@ class AwsS3Uploader(Uploader):
 
         Arguments:
             kwargs (dict): parameters to format the aws upload cli command
+        
+        Returns:
+            (int): exit status code
         """
 
         kwargs.update(self.base_config)
@@ -113,6 +154,9 @@ class AwsS3Uploader(Uploader):
 
         Arguments:
             line (str): additional upload entry line in manifest
+        
+        Returns:
+            (list): exit status codes
         """
 
         ls = line.rstrip().split("\t")
@@ -128,6 +172,9 @@ class AwsS3Uploader(Uploader):
         Arguments:
             template (str): unformatted upload cli command template
             parameters (dict): parameters to format the upload cli command
+        
+        Returns:
+            (int): exit status code
         """
 
         cmd = template.format(**parameters).split(" ")
