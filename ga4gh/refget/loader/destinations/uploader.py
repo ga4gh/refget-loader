@@ -86,7 +86,7 @@ class Uploader(object):
     
     def upload_seq_entries(self):
         exit_codes = []
-        for line in self.seq_table[1:4]: # exclude header line
+        for line in self.seq_table[1:]: # exclude header line
             exit_codes += self.upload_seq_entry(line)
         return exit_codes
 

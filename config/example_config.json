@@ -3,7 +3,7 @@
     "type": "ena_assembly",
     "ena_refget_processor_script": "/Users/jadams/Github/andrewyatz/ena-refget-processor/bin/load_expanded_con.pl",
     "processing_dir": "/Users/jadams/Test/200218-refget-loader",
-    "start_date": "2019-08-01",
+    "start_date": "2019-09-16",
     "number_of_days": 1
   },
   "destination": {
