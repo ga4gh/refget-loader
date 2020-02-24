@@ -1,3 +1,9 @@
+[![Python 3.6](https://img.shields.io/badge/python-3.6%20|%203.7-blue.svg?style=flat-square)](https://www.python.org)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](https://opensource.org/licenses/Apache-2.0)
+[![Travis (.org) branch](https://img.shields.io/travis/ga4gh/refget-loader/develop.svg?style=flat-square)](https://travis-ci.org/ga4gh/refget-loader)
+[![Coverage Status](https://img.shields.io/coveralls/github/ga4gh/refget-loader/develop?style=flat-square)](https://coveralls.io/github/ga4gh/refget-loader?branch=develop)
+
+
 # Refget Loader
 Load reference sequences to Public Cloud Storage from a variety of data sources
 
