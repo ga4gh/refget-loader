@@ -3,6 +3,7 @@
 
 Attributes:
     cases (list): list of test cases to use in unit test method(s)
+    is_status (dict): expected results based on status
 """
 
 import json
