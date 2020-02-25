@@ -7,7 +7,7 @@ install:
   - python setup.py install
   - python -m pip install -r requirements_test.txt
 before_script:
-  - sudo mkdir /nfs/ftp/pub/databases/ena/wgs/public/
+  - sudo mkdir -p /nfs/ftp/pub/databases/ena/wgs/public/
   - for i in `ls -1 tests/data/dat`; do A=`echo "${i:0:2}" | awk '{print tolower($0)}'`; C="/nfs/ftp/pub/databases/ena/wgs/public/${A}"; sudo mkdir -p $C; sudo ln -s `pwd`/tests/data/dat/${i} $C; done
 script:
   - python -m pytest --cov=ga4gh/ --cov-report=term-missing tests/
