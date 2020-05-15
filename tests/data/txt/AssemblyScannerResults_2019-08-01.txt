@@ -1,6 +1,6 @@
 Accession	URL
 GCA_003957565.2	ftp://ftp.ebi.ac.uk/pub/databases/ena/wgs/public/rr/RRCB01.dat.gz
-GCA_004027225.1	ftp://ftp.ebi.ac.uk/pub/databases/ena/wgs/public/rx/RXXE01.dat.gz
+GCA_004027225.2	ftp://ftp.ebi.ac.uk/pub/databases/ena/wgs/public/rx/RXXE02.dat.gz
 GCA_007273535.1	ftp://ftp.ebi.ac.uk/pub/databases/ena/wgs/public/ri/RIBP01.dat.gz
 GCA_007364275.2	ftp://ftp.ebi.ac.uk/pub/databases/ena/wgs/public/st/STFV01.dat.gz
 GCA_007644095.1	ftp://ftp.ebi.ac.uk/pub/databases/ena/wgs/public/si/SIDA01.dat.gz

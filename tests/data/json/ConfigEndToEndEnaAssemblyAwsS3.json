@@ -1,0 +1,14 @@
+{
+  "source": {
+    "type": "ena_assembly",
+    "ena_refget_processor_script": "/path/to/script.pl",
+    "processing_dir": "tests/data/output",
+    "start_date": "2019-08-02",
+    "number_of_days": 1
+  },
+  "destination": {
+    "type": "aws_s3",
+    "bucket_name": "ga4gh-refget"
+  },
+  "environment": "local"
+}

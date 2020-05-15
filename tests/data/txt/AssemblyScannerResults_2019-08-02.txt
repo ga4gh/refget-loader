@@ -3,7 +3,7 @@ GCA_000238955.5	ftp://ftp.ebi.ac.uk/pub/databases/ena/wgs/public/ag/AGTA05.dat.g
 GCA_002192655.2	ftp://ftp.ebi.ac.uk/pub/databases/ena/wgs/public/nd/NDFZ01.dat.gz
 GCA_007827025.1	ftp://ftp.ebi.ac.uk/pub/databases/ena/wgs/public/sp/SPQE01.dat.gz
 GCA_007827045.1	ftp://ftp.ebi.ac.uk/pub/databases/ena/wgs/public/rp/RPFW01.dat.gz
-GCA_007827085.1	ftp://ftp.ebi.ac.uk/pub/databases/ena/wgs/public/va/VALE01.dat.gz
+GCA_007827085.2	ftp://ftp.ebi.ac.uk/pub/databases/ena/wgs/public/va/VALE02.dat.gz
 GCA_007827205.1	ftp://ftp.ebi.ac.uk/pub/databases/ena/wgs/public/vi/VIRZ01.dat.gz
 GCA_007827215.1	ftp://ftp.ebi.ac.uk/pub/databases/ena/wgs/public/vi/VISA01.dat.gz
 GCA_007827235.1	ftp://ftp.ebi.ac.uk/pub/databases/ena/wgs/public/vi/VISB01.dat.gz

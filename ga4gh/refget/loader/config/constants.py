@@ -26,3 +26,14 @@ class JsonObjectType(object):
     SOURCE = 1
     DESTINATION = 2
     RUNTIME = 3
+
+class MIMETypes(object):
+    """MIME string constants related to Content-Type headers in refget spec
+
+    Attributes:
+    """
+
+    SEQUENCE_REFGET = "text/vnd.ga4gh.refget.v1.0.0+plain"
+    SEQUENCE_GENERIC = "text/plain"
+    METADATA_REFGET = "application/vnd.ga4gh.refget.v1.0.0+json"
+    METADATA_GENERIC = "application/json"

@@ -12,6 +12,7 @@ to the primary id.
 
 import os
 import subprocess
+from ga4gh.refget.loader.config.constants import MIMETypes
 from ga4gh.refget.loader.destinations.uploader import Uploader
 from ga4gh.refget.loader.jobset_status import JobsetStatus
 
@@ -34,12 +35,16 @@ class AwsS3Uploader(Uploader):
 
         super(AwsS3Uploader, self).__init__(manifest)
 
+        self.sequence_content_type = MIMETypes.SEQUENCE_GENERIC
+        self.metadata_content_type = MIMETypes.METADATA_REFGET
+
         # generic template for putting a seq on s3 
         self.put_object_template = \
             "aws s3api put-object " \
             + "--bucket {bucket_name} " \
             + "--key {s3_path} " \
             + "--acl public-read " \
+            + "--content-type {content_type}" \
             + "{aws_profile} "
         
         # template for putting a seq by its primary id
@@ -105,9 +110,15 @@ class AwsS3Uploader(Uploader):
         
         # upload both sequence and metadata according to the primary checksum
         ecs.append(self.__upload_file_primary_checksum(
-            s3_path=seq_primary_path, file_path=seq))
+            s3_path=seq_primary_path,
+            file_path=seq,
+            content_type=self.sequence_content_type
+        ))
         ecs.append(self.__upload_file_primary_checksum(
-            s3_path=metadata_primary_path, file_path=metadata))
+            s3_path=metadata_primary_path,
+            file_path=metadata,
+            content_type=self.metadata_content_type
+        ))
 
         # for each secondary id in the manifest entry, upload empty sequence
         # and metadata files, which will redirect to the primary entry
@@ -115,10 +126,14 @@ class AwsS3Uploader(Uploader):
             seq_secondary_path = "sequence/" + secondary_id
             metadata_secondary_path = "metadata/json/" + secondary_id + ".json"
             ecs.append(self.__upload_file_secondary_checksum(
-                s3_path=seq_secondary_path, redirect="/"+seq_primary_path))
+                s3_path=seq_secondary_path,
+                redirect="/"+seq_primary_path,
+                content_type=self.sequence_content_type
+            ))
             ecs.append(self.__upload_file_secondary_checksum(
                 s3_path=metadata_secondary_path,
-                redirect="/"+metadata_primary_path
+                redirect="/"+metadata_primary_path,
+                content_type=self.metadata_content_type
             ))
         
         return ecs

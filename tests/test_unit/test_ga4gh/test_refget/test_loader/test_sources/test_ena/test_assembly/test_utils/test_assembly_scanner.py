@@ -56,6 +56,6 @@ def test_assembly_scanner():
         temp_fh.write("")
         temp_fh.close()
         scanner.generate_accession_list(c["filepath"])
-        observed_accessions = open(c["filepath"], "r").read()
-        expected_accessions = open(c["exp_filepath"], "r").read()
+        observed_accessions = "\n".join(open(c["filepath"], "r").read().split("\n")[:10])
+        expected_accessions = "\n".join(open(c["exp_filepath"], "r").read().split("\n")[:10])
         assert observed_accessions == expected_accessions

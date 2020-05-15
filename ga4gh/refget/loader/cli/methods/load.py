@@ -11,6 +11,7 @@ upload the refget seqs to the requested destination
 
 import click
 import json
+import sys
 from ga4gh.refget.loader.config.constants import Status, JsonObjectType
 from ga4gh.refget.loader.refget_loader import RefgetLoader
 from ga4gh.refget.loader.validator import Validator
@@ -70,3 +71,4 @@ def load(**kwargs):
         
     except Exception as e:
         print(e)
+        sys.exit(1)
