@@ -44,7 +44,7 @@ class AwsS3Uploader(Uploader):
             + "--bucket {bucket_name} " \
             + "--key {s3_path} " \
             + "--acl public-read " \
-            + "--content-type {content_type}" \
+            + "--content-type {content_type} " \
             + "{aws_profile} "
         
         # template for putting a seq by its primary id
